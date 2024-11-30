@@ -9,6 +9,7 @@ const SuccessPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    console.log("Params received on success page:", Object.fromEntries(params.entries()));
     const paymentStatus = params.get("status"); // This will come from PayU
     const transactionId = params.get("txnid"); // PayU's transaction ID
 
