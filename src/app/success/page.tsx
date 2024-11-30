@@ -15,6 +15,7 @@ const SuccessPage = () => {
 
     // Retrieve the appointment data from the query params (sent from the Checkout page)
     const expertId = params.get("expertId");
+    const expertName = params.get("expertName");
     const userName = params.get("userName");
     const userEmail = params.get("userEmail");
     const whatsappNumber = params.get("whatsappNumber");
@@ -25,7 +26,7 @@ const SuccessPage = () => {
     if (paymentStatus === "success") {
       const appointment = {
         expertId,
-        expertName: "Expert Name", // This would come from your expert data
+        expertName, 
         userName,
         userEmail,
         whatsappNumber,
@@ -41,7 +42,7 @@ const SuccessPage = () => {
           // Successfully added the document
           alert("Appointment successfully booked!");
           // Redirect to the confirmation page with the booking ID
-          router.push(`/confirmation?bookingId=${docRef.id}`);
+          router.push(`/Confirmation?bookingId=${docRef.id}`);
         })
         .catch((error) => {
           console.error("Error adding document: ", error.message);

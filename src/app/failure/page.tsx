@@ -4,20 +4,22 @@ import React, { Suspense } from "react";
 
 function FailureContent() {
   const searchParams = useSearchParams();
-  const status = searchParams.get("status"); // "cancel" or "failure"
-  const mihpayid = searchParams.get("mihpayid"); // PayU's transaction ID
-
-  const message =
-    status === "cancel"
-      ? "You have canceled the payment process."
-      : "Payment failed due to an error. Please try again.";
+  const status = searchParams.get("status");
+  const mihpayid = searchParams.get("mihpayid");
 
   console.log("Failure page params:", { status, mihpayid });
 
+  const message =
+  status === "cancel"
+    ? `You have canceled the payment process. Transaction ID: ${mihpayid}`
+    : status === "failure"
+    ? `Payment failed due to an error. Transaction ID: ${mihpayid}`
+    : "Unknown error occurred. Please try again.";
+
   return (
-    <div>
+    <div style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>
       <h1>Payment Failed</h1>
-      <p>{message}</p>
+      <p >{message}</p>
     </div>
   );
 }

@@ -33,9 +33,9 @@ export const POST = async (req) => {
       firstname,         // Customer's First Name
       email,             // Customer's Email
       phone,             // Customer's Phone (optional)
-      surl: "https://aerocog.tech/success", // Success URL
-      furl: "https://aerocog.tech/failure", // Failure URL
-      curl: "https://aerocog.tech/failure", // Cancel URL
+      surl: `${process.env.NEXT_PUBLIC_BASE_URL}/success`, // Success URL
+      furl: `${process.env.NEXT_PUBLIC_BASE_URL}/failure`, // Failure URL
+      curl: `${process.env.NEXT_PUBLIC_BASE_URL}/failure`, // Cancel URL
     };
 
     // Construct the string for hash generation
@@ -44,7 +44,7 @@ export const POST = async (req) => {
     // Generate the hash using SHA-512
     const hash = crypto.createHash('sha512').update(hashString).digest('hex');
     payload.hash = hash;
-    console.log("Payload sent to PayU:", payload);
+    
 
     // Return the payload for client-side submission to PayU
     return NextResponse.json({ payload }, { status: 200 });

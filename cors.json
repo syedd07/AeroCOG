@@ -1,11 +1,6 @@
 [
   {
-    "origin": [
-      "http://localhost:3000",       
-      "https://aerocog-8af654b8a9d1.herokuapp.com/",
-      "https://aerocog.tech"
-
-    ],
+    "origin": "*",
     "responseHeader": [
       "Content-Type",
       "Authorization"
