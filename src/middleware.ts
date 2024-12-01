@@ -7,8 +7,7 @@ export function middleware(request: NextRequest) {
   // Allow PayU's origin for success and failure pages
   if (pathname.startsWith("/success") || pathname.startsWith("/failure")) {
     const response = NextResponse.next();
-    response.headers.set("x-forwarded-host", "secure.payu.in");
-    response.headers.append("x-forwarded-host", "test.payu.in");
+    response.headers.set("x-forwarded-host", "test.payu.in",);
     return response;
   }
   console.log("Middleware executed for:", request.nextUrl.href);
