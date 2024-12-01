@@ -25,7 +25,7 @@ const SuccessPage = () => {
     // Validate the headers
     const allowedOrigins = [
       "https://aerocog.tech",
-      "https://secure.payu.in" // Allow PayU's origin
+      "https://test.payu.in/_payment" // Allow PayU's origin
     ];
     const origin = window.location.origin;
     const forwardedHost = window.location.host;
