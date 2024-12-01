@@ -12,11 +12,22 @@ const nextConfig = {
       },
     ],
   },
-};
-module.exports = {
-// Enable build caching
+  
+  async headers() {
+    return [
+      {
+        source: "/:path*", // Apply this to all routes
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Vary", value: "Origin" },
+        ],
+      },
+    ];
+  },
+
   experimental: {
     buildCache: true,
   },
 };
+
 module.exports = nextConfig;

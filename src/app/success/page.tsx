@@ -9,28 +9,43 @@ const SuccessPage = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    console.log("Params received on success page:", Object.fromEntries(params.entries()));
     const paymentStatus = params.get("status"); // This will come from PayU
     const transactionId = params.get("txnid"); // PayU's transaction ID
 
     // Retrieve the appointment data from the query params (sent from the Checkout page)
     const expertId = params.get("expertId");
+    const expertName = params.get("expertName");
     const userName = params.get("userName");
     const userEmail = params.get("userEmail");
     const whatsappNumber = params.get("whatsappNumber");
     const dateString = params.get("date");
     const time = params.get("time");
 
+    // Validate the headers
+    const allowedOrigins = [
+      "https://aerocog.tech",
+      "https://secure.payu.in" // Allow PayU's origin
+    ];
+    const origin = window.location.origin;
+    const forwardedHost = window.location.host;
+
+    if (!allowedOrigins.includes(origin) && forwardedHost !== "aerocog.tech") {
+      console.error("Invalid origin or forwarded host", { origin, forwardedHost });
+      alert("Unauthorized access. Please contact support@aerocog.tech");
+      router.push("/experts");
+      return;
+    }
 
     if (paymentStatus === "success") {
       const appointment = {
         expertId,
-        expertName: "Expert Name", // This would come from your expert data
+        expertName, 
         userName,
         userEmail,
         whatsappNumber,
         date: dateString,
         time,
-        
         createdAt: new Date().toISOString(),
       };
 
@@ -40,14 +55,14 @@ const SuccessPage = () => {
           // Successfully added the document
           alert("Appointment successfully booked!");
           // Redirect to the confirmation page with the booking ID
-          router.push(`/confirmation?bookingId=${docRef.id}`);
+          router.push(`/Confirmation?bookingId=${docRef.id}`);
         })
         .catch((error) => {
           console.error("Error adding document: ", error.message);
           alert("There was an error with the booking. Please contact support@aerocog.tech");
         });
     } else {
-      alert("Payment failed or was cancelled. contact support@aerocog.tech");
+      alert("Payment failed or was cancelled. Contact support@aerocog.tech");
       router.push("/experts");
     }
   }, [router]);
