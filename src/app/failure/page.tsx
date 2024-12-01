@@ -14,7 +14,7 @@ function FailureContent() {
     ? `You have canceled the payment process. Transaction ID: ${mihpayid}`
     : status === "failure"
     ? `Payment failed due to an error. Transaction ID: ${mihpayid}`
-    : "Unknown error occurred. Please try again.";
+    : `Unknown error occurred. Please try again. If this error presists, please contact support@aerocog.tech`;
 
   return (
     <div style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>
@@ -26,7 +26,7 @@ function FailureContent() {
 
 export default function FailurePage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>Loading...</div>}>
       <FailureContent />
     </Suspense>
   );
