@@ -25,7 +25,8 @@ const SuccessPage = () => {
     // Validate the headers
     const allowedOrigins = [
       "https://aerocog.tech",
-      "https://test.payu.in/_payment" // Allow PayU's origin
+      "https://test.payu.in/_payment" ,
+      "https://aerocog.netlify.app"   // Allow PayU's origin
     ];
     const origin = window.location.origin;
     const forwardedHost = window.location.host;
