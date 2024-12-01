@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../components/firebase";
+import { db } from "../../../components/firebase";
 
 const SuccessPage = () => {
   const router = useRouter();
@@ -22,6 +22,20 @@ const SuccessPage = () => {
     const dateString = params.get("date");
     const time = params.get("time");
 
+    // Validate the headers
+    const allowedOrigins = [
+      "https://aerocog.tech",
+      "https://secure.payu.in" // Allow PayU's origin
+    ];
+    const origin = window.location.origin;
+    const forwardedHost = window.location.host;
+
+    if (!allowedOrigins.includes(origin) && forwardedHost !== "aerocog.tech") {
+      console.error("Invalid origin or forwarded host", { origin, forwardedHost });
+      alert("Unauthorized access. Please contact support@aerocog.tech");
+      router.push("/experts");
+      return;
+    }
 
     if (paymentStatus === "success") {
       const appointment = {
@@ -32,7 +46,6 @@ const SuccessPage = () => {
         whatsappNumber,
         date: dateString,
         time,
-        
         createdAt: new Date().toISOString(),
       };
 
@@ -49,7 +62,7 @@ const SuccessPage = () => {
           alert("There was an error with the booking. Please contact support@aerocog.tech");
         });
     } else {
-      alert("Payment failed or was cancelled. contact support@aerocog.tech");
+      alert("Payment failed or was cancelled. Contact support@aerocog.tech");
       router.push("/experts");
     }
   }, [router]);
