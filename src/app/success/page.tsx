@@ -1,80 +1,169 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
 
 const SuccessPage = () => {
   const router = useRouter();
+  const [loading, setLoading] = useState(true); // Loading state
+  const [step, setStep] = useState(0); // Track progress in the stepper
+  const [transactionData, setTransactionData] = useState(null); // Store verified transaction details
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    console.log("Params received on success page:", Object.fromEntries(params.entries()));
-    
-    // Extracting PayU's payment status and transaction ID
-    const paymentStatus = params.get("status"); // This will come from PayU
-    const transactionId = params.get("txnid"); // PayU's transaction ID
+    const verifyPayment = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const txnId = params.get("txnid");
 
-    // Retrieve the appointment data from the query params
-    const expertId = params.get("expertId");
-    const expertName = params.get("expertName");
-    const userName = params.get("userName");
-    const userEmail = params.get("userEmail");
-    const whatsappNumber = params.get("whatsappNumber");
-    const dateString = params.get("date");
-    const time = params.get("time");
+      try {
+        // Call the backend to verify the transaction
+        const response = await axios.post("/api/payu/verify", { txnId });
+        const { status, transactionDetails } = response.data;
 
-    // Validate the headers (origin validation, optional)
-    const allowedOrigins = [
-      "https://aerocog.tech",
-      "https://secure.payu.in" // Allow PayU's origin
-    ];
-    const origin = window.location.origin;
-    const forwardedHost = window.location.host;
+        if (status === "success") {
+          setTransactionData(transactionDetails);
+          setStep(2); // Move to Step 2: Payment Verified
+          // Add additional logic if needed
+        } else {
+          throw new Error("Transaction verification failed");
+        }
+      } catch (error) {
+        console.error("Error verifying payment:", error.message);
+        alert("Payment verification failed. Please contact support@aerocog.tech");
+        //router.push("/experts");
+      } finally {
+        setLoading(false); // Stop the loading spinner
+      }
+    };
 
-    if (!allowedOrigins.includes(origin) && forwardedHost !== "aerocog.tech") {
-      console.error("Invalid origin or forwarded host", { origin, forwardedHost });
-      alert("Unauthorized access. Please contact support@aerocog.tech");
-     // router.push("/experts");
-      return;
-    }
-
-    // Only proceed if the payment status is successful
-    if (paymentStatus === "success") {
-      const appointment = {
-        expertId,
-        expertName, 
-        userName,
-        userEmail,
-        whatsappNumber,
-        date: dateString,
-        time,
-        createdAt: new Date().toISOString(),
-      };
-
-      // If payment is successful, create the appointment document
-      addDoc(collection(db, "appointments"), appointment)
-        .then((docRef) => {
-          // Successfully added the document
-          alert("Appointment successfully booked!");
-          // Redirect to the confirmation page with the booking ID
-          router.push(`/confirmation?bookingId=${docRef.id}`);
-        })
-        .catch((error) => {
-          console.error("Error adding document: ", error.message);
-          alert("There was an error with the booking. Please contact support@aerocog.tech");
-        });
-    } else {
-      // If payment is not successful, redirect or show error
-      alert("Payment failed or was cancelled. Please contact support@aerocog.tech");
-      //router.push("/experts");
-    }
+    verifyPayment();
   }, [router]);
 
+  // Simulate step progression for demonstration
+  useEffect(() => {
+    if (step === 2) {
+      setTimeout(() => setStep(3), 2000); // Transition to Step 3
+    }
+  }, [step]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" />
+        <p className="ml-4">Verifying payment, please wait...</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="success-page-wrapper" style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>
-      <h2 >Payment Success</h2>
-      <p>Your payment was successful. Please check your booking details.</p>
+    <div className="success-page-wrapper">
+      <h2 className="text-center text-xl font-bold mt-4">Transaction Successful</h2>
+      {transactionData && (
+        <div className="mt-4 text-center">
+          <p>
+            <strong>Transaction ID:</strong> {transactionData.txnId}
+          </p>
+          <p>
+            <strong>Date:</strong> {transactionData.date}
+          </p>
+          <p>
+            <strong>Amount:</strong> ₹{transactionData.amount}
+          </p>
+        </div>
+      )}
+
+      {/* Timeline Stepper */}
+      <div style={{marginTop: '200px', marginBottom: '150px', justifyItems:'center', justifyContent: 'center'}}>
+      <ol className="relative text-gray-500 border-l border-gray-200 dark:border-gray-700 dark:text-gray-400 mt-8">
+        <li className={`mb-10 ml-6 ${step >= 1 ? "text-green-600" : ""}`}>
+          <span
+            className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${
+              step >= 1 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"
+            }`}
+          >
+            {step >= 1 ? (
+              <svg
+                className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 16 12"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M1 5.917 5.724 10.5 15 1.5"
+                />
+              </svg>
+            ) : (
+              <span className="w-3.5 h-3.5 text-gray-500">1</span>
+            )}
+          </span>
+          <h3 className="font-medium leading-tight">Payment Initiated</h3>
+          <p className="text-sm">We are verifying your payment.</p>
+        </li>
+
+        <li className={`mb-10 ml-6 ${step >= 2 ? "text-green-600" : ""}`}>
+          <span
+            className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${
+              step >= 2 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"
+            }`}
+          >
+            {step >= 2 ? (
+              <svg
+                className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 16 12"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M1 5.917 5.724 10.5 15 1.5"
+                />
+              </svg>
+            ) : (
+              <span className="w-3.5 h-3.5 text-gray-500">2</span>
+            )}
+          </span>
+          <h3 className="font-medium leading-tight">Payment Verified</h3>
+          <p className="text-sm">Your payment was successful.</p>
+        </li>
+
+        <li className={`ml-6 ${step >= 3 ? "text-green-600" : ""}`}>
+          <span
+            className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${
+              step >= 3 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"
+            }`}
+          >
+            {step >= 3 ? (
+              <svg
+                className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 16 12"
+              >
+                <path
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M1 5.917 5.724 10.5 15 1.5"
+                />
+              </svg>
+            ) : (
+              <span className="w-3.5 h-3.5 text-gray-500">3</span>
+            )}
+          </span>
+          <h3 className="font-medium leading-tight">Booking Confirmed</h3>
+          <p className="text-sm">Your appointment is booked.</p>
+        </li>
+      </ol>
+      </div>
     </div>
   );
 };
