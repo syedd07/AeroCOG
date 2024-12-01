@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../../components/firebase";
+import { db } from "../../components/firebase";
 
 const SuccessPage = () => {
   const router = useRouter();
