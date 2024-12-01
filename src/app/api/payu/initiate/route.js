@@ -33,9 +33,11 @@ export const POST = async (req) => {
       firstname,         // Customer's First Name
       email,             // Customer's Email
       phone,             // Customer's Phone (optional)
-      surl: "https:aerocog.tech/success", // Success URL
-      furl: "https:aerocog.tech/failure", // Failure URL
-      curl: "https:aerocog.tech/failure", // Cancel URL
+      service_provider: "payu_paisa", // Service Provider
+      hash: generatedHash, // Precomputed hash
+      surl: "https://aerocog.tech/success", // Success URL
+      furl: "https://aerocog.tech/failure", // Failure URL
+      curl: "https://aerocog.tech/failure", // Cancel URL
     };
 
     // Construct the string for hash generation
