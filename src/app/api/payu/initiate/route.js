@@ -33,9 +33,9 @@ export const POST = async (req) => {
       firstname,         // Customer's First Name
       email,             // Customer's Email
       phone,             // Customer's Phone (optional)
-      surl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/success`, // Success URL
-      furl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/failure`, // Failure URL
-      curl: `${process.env.NEXT_PUBLIC_BASE_URL}/api/failure`, // Cancel URL
+      surl: "https:aerocog.trch/api/success", // Success URL
+      furl: "https:aerocog.trch/api/failure", // Failure URL
+      curl: "https:aerocog.trch/api/failure", // Cancel URL
     };
 
     // Construct the string for hash generation

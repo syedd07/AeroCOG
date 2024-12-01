@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     response.headers.set("x-forwarded-host", "secure.payu.in");
     return response;
   }
-
+  console.log("Middleware executed for:", request.nextUrl.href);
   // Default response for other routes
   return NextResponse.next();
 }
