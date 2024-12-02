@@ -60,6 +60,11 @@ const SuccessPage = () => {
 
     verifyPayment();
   }, [router]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    console.log("PayU Redirect Parameters:", Object.fromEntries(params.entries()));
+  }, []);
+  
 
   if (loading) {
     return (
