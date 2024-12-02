@@ -15,9 +15,9 @@ const SuccessPage = () => {
   useEffect(() => {
     const verifyPayment = async () => {
       const params = new URLSearchParams(window.location.search);
-      const txnId = params.get("txnid");
+      const mihpayid = params.get("mhpayid");
 
-      if (!txnId) {
+      if (!mihpayid) {
         alert("Transaction ID not found. Please contact support@aerocog.tech");
         router.push("/experts");
         return;
@@ -25,22 +25,26 @@ const SuccessPage = () => {
 
       try {
         setStep(1); // Payment Initiated
-        const response = await axios.post("/api/payu/verify", { txnId });
+        const response = await axios.post("/api/payu/verify", { mihpayid });
 
         if (response.data.status === "success") {
           const { transactionDetails } = response.data;
           setTransactionData(transactionDetails);
           setStep(2); // Payment Verified
 
-          // Add booking details to Firestore
+          // Prepare Firestore document
           const appointment = {
-            txnId: transactionDetails.txnId,
-            expertId: transactionDetails.expertId,
-            userEmail: transactionDetails.userEmail,
+            createdAt: new Date().toISOString(),
             date: transactionDetails.date,
+            expertId: transactionDetails.expertId,
+            expertEmail: transactionDetails.expertEmail,
+            expertName: transactionDetails.expertName,
+            userEmail: transactionDetails.userEmail,
+            userName: transactionDetails.userName,
             time: transactionDetails.time,
+            whatsappNumber: transactionDetails.whatsappNumber,
             amount: transactionDetails.amount,
-            status: "Confirmed",
+            status: "Paid",
           };
 
           await addDoc(collection(db, "appointments"), appointment);
@@ -60,12 +64,7 @@ const SuccessPage = () => {
 
     verifyPayment();
   }, [router]);
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    console.log("PayU Redirect Parameters:", Object.fromEntries(params.entries()));
-  }, []);
-  
-
+ 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">

@@ -2,10 +2,10 @@ import axios from "axios";
 
 export async function POST(req) {
   try {
-    const { txnId } = await req.json();
+    const { mihpayid } = await req.json();
 
-    if (!txnId) {
-      return new Response(JSON.stringify({ status: "error", message: "Missing txnId" }), {
+    if (!mihpayid) {
+      return new Response(JSON.stringify({ status: "error", message: "Missing mihpayid" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
@@ -20,10 +20,8 @@ export async function POST(req) {
         client_secret: process.env.PAYU_SALT, // Merchant Salt
       },
       {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        timeout: 10000, // Optional: 10-second timeout
+        headers: { "Content-Type": "application/json" },
+        timeout: 15000, // 15-second timeout
       }
     );
 
@@ -40,13 +38,13 @@ export async function POST(req) {
     // Step 2: Verify the Transaction with the Generated Token
     const verifyResponse = await axios.post(
       "https://secure.payu.in/verify",
-      { txnId },
+      { mihpayid }, // Use mihpayid for verification
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
         },
-        timeout: 10000,
+        timeout: 15000,
       }
     );
 
