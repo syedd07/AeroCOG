@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import axios from "axios";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
@@ -14,8 +14,8 @@ const SuccessPage = () => {
 
   useEffect(() => {
     const verifyPayment = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const mihpayid = params.get("mhpayid");
+      //const params = new URLSearchParams(window.location.search);
+      const { mihpayid } = router.query;
 
       if (!mihpayid) {
         alert("Transaction ID not found. Please contact support@aerocog.tech");
