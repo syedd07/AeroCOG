@@ -13,9 +13,13 @@ const SuccessPage = () => {
   const [transactionData, setTransactionData] = useState(null);
 
   useEffect(() => {
+    // Ensure that query parameters are available before proceeding
+    if (!router.isReady) {
+      return; // Don't execute if router is not ready
+    }
+
     const verifyPayment = async () => {
-      //const params = new URLSearchParams(window.location.search);
-      const { mihpayid } = router.query;
+      const { mihpayid } = router.query; // Access mihpayid from query params
 
       if (!mihpayid) {
         alert("Transaction ID not found. Please contact support@aerocog.tech");
@@ -63,8 +67,8 @@ const SuccessPage = () => {
     };
 
     verifyPayment();
-  }, [router]);
- 
+  }, [router.isReady, router.query]); // Trigger when router is ready or query changes
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
