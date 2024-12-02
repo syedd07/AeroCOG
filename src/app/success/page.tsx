@@ -7,6 +7,7 @@ import { db } from "../../components/firebase";
 
 const SuccessPage = () => {
   const router = useRouter();
+  
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(0);
   const [transactionData, setTransactionData] = useState(null);

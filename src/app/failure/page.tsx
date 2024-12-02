@@ -10,15 +10,16 @@ function FailureContent() {
   console.log("Failure page params:", { status, mihpayid });
 
   const message =
-  status === "cancel"
-    ? `You have canceled the payment process. Transaction ID: ${mihpayid}`
-    : status === "failure"
-    ? `Payment failed due to an error. Transaction ID: ${mihpayid}`
-    : `Unknown error occurred. Please try again. If this error presists, please contact support@aerocog.tech`;
+    status === "cancel"
+      ? `You have canceled the payment process. Transaction ID: ${mihpayid}`
+      : status === "failure"
+      ? `Payment failed due to an error. Transaction ID: ${mihpayid}` 
+      : `Unknown error occurred. Please try again. If this error presists,
+        please contact support@aerocog.tech with the transaction ID: ${mihpayid}`;
 
   return (
     <div style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>
-      <h1>Payment Failed</h1>
+      <h1 className="text-red-500">Payment Failed</h1>
       <p >{message}</p>
     </div>
   );
