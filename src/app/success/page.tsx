@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+import { useRouter } from "next/compat/router";
 import axios from "axios";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
