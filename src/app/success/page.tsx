@@ -12,14 +12,15 @@ const VerifyPayment = ({ setLoading, setStep, setTransactionData }) => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const mihpayid = searchParams.get("mihpayid");
-  console.log("mihpayid:", mihpayid);
   
-
-
+  // Log mihpayid to check if it is correctly passed in the query parameters.
+  console.log("mihpayid from search params:", mihpayid); 
+  
   useEffect(() => {
     const verifyPayment = async () => {
-      
+      console.log("Started payment verification process"); // Log when verification starts.
 
+      // Check if mihpayid is missing, log and handle the error.
       if (!mihpayid) {
         alert("Transaction ID not found. Please contact support@aerocog.tech");
         router.push("/experts");
@@ -28,13 +29,20 @@ const VerifyPayment = ({ setLoading, setStep, setTransactionData }) => {
 
       try {
         setStep(1); // Payment Initiated
-        console.log("Starting payment verification...");
-        const response = await axios.post("/api/payu/verify", { mihpayid });
+        console.log("Payment verification started for mihpayid:", mihpayid); // Log before making API call
 
+          // Make the API call to verify payment
+        const response = await axios.post("/api/payu/verify", { mihpayid });
+        console.log("Payment verification response:", response.data); // Log the API response
+        
+         // Check if the response status is success
         if (response.data.status === "success") {
           const { transactionDetails } = response.data;
           setTransactionData(transactionDetails);
           setStep(2); // Payment Verified
+          
+          // Log transaction details
+          console.log("Transaction details retrieved:", transactionDetails);
 
           // Prepare Firestore document
           const appointment = {
@@ -50,18 +58,20 @@ const VerifyPayment = ({ setLoading, setStep, setTransactionData }) => {
             amount: transactionDetails.amount,
             status: "Paid",
           };
-
+          console.log("Preparing to save appointment to Firestore:", appointment); // Log appointment data
           await addDoc(collection(db, "appointments"), appointment);
           setStep(3); // Booking Confirmed
         } else {
           throw new Error("Transaction verification failed. Please contact support@aerocog.tech");
         }
       } catch (error) {
-        console.error("Error verifying payment:", error.message);
+        console.log("Payment verification failed with response:"); // Log failed verification
+        console.error("Error verifying payment:", error.message); // Log the error
         alert("Payment verification failed. Please contact support@aerocog.tech");
         router.push("/experts");
       } finally {
-        setLoading(false);
+        console.log("Finalizing payment verification process."); // Log when the process finishes
+        setLoading(false); // Set loading to false after the process ends
       }
     };
 
@@ -76,7 +86,13 @@ const SuccessPage = () => {
   const [step, setStep] = useState(0);
   const [transactionData, setTransactionData] = useState(null);
 
+  // Log when the SuccessPage is rendered
+  console.log("SuccessPage rendered, loading state:", loading);
+
   if (loading) {
+    // Log when loading screen is displayed
+    console.log("Loading screen is active...");
+
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" />
