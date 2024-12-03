@@ -21,16 +21,19 @@ export async function POST(req) {
       },
       {
         headers: { "Content-Type": "application/json" },
-        timeout: 15000, // 15-second timeout
+        timeout: 20000, // 20-second timeout
       }
     );
 
-    if (!tokenResponse.data || !tokenResponse.data.access_token) {
-      console.error("Error generating PayU token:", tokenResponse.data);
-      return new Response(JSON.stringify({ status: "error", message: "Token generation failed" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+    if (!tokenResponse?.data?.access_token) {
+      console.error("Token generation failed:", tokenResponse.data);
+      return new Response(
+        JSON.stringify({ status: "error", message: "Token generation failed" }),
+        {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
     const accessToken = tokenResponse.data.access_token;
@@ -48,24 +51,37 @@ export async function POST(req) {
       }
     );
 
-    if (verifyResponse.data && verifyResponse.data.status === "success") {
+    if (verifyResponse?.data?.status === "success") {
       return new Response(
-        JSON.stringify({ status: "success", transactionDetails: verifyResponse.data.transaction }),
+        JSON.stringify({
+          status: "success",
+          transactionDetails: verifyResponse.data.transaction,
+        }),
         {
           status: 200,
           headers: { "Content-Type": "application/json" },
         }
       );
     } else {
-      console.error("PayU verification failed:", verifyResponse.data.message || "Unknown error");
-      return new Response(JSON.stringify({ status: "error", message: "Verification failed" }), {
+      console.error("PayU verification failed:", 
+        verifyResponse?.data?.message || "Unknown error"
+      );
+      return new Response(
+        JSON.stringify({
+           status: "error",
+            message: "Verification failed" 
+          }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
   } catch (error) {
     console.error("PayU API error:", error.response?.data || error.message);
-    return new Response(JSON.stringify({ status: "error", message: "An unexpected error occurred" }), {
+    return new Response(
+      JSON.stringify({
+        status: "error",
+        message: "An unexpected error occurred" 
+      }), {
       status: 500,
       headers: { "Content-Type": "application/json" },
     });

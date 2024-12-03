@@ -5,14 +5,21 @@ import { useSearchParams } from "next/navigation";
 import axios from "axios";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
+import { json } from "express";
 
 
-const VerifyPayment = ({ setLoading, setStep, setTransactionData, router }) => {
+const VerifyPayment = ({ setLoading, setStep, setTransactionData }) => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const mihpayid = searchParams.get("mihpayid");
+  console.log("mihpayid:", mihpayid);
+  
+
 
   useEffect(() => {
     const verifyPayment = async () => {
+      
+
       if (!mihpayid) {
         alert("Transaction ID not found. Please contact support@aerocog.tech");
         router.push("/experts");
@@ -21,6 +28,7 @@ const VerifyPayment = ({ setLoading, setStep, setTransactionData, router }) => {
 
       try {
         setStep(1); // Payment Initiated
+        console.log("Starting payment verification...");
         const response = await axios.post("/api/payu/verify", { mihpayid });
 
         if (response.data.status === "success") {
@@ -82,7 +90,7 @@ const SuccessPage = () => {
       setLoading={setLoading}
       setStep={setStep}
       setTransactionData={setTransactionData}
-      router={router} 
+       
       />
       <div className="success-page-wrapper">
         <h2 className="text-center text-xl font-bold mt-4">Transaction Successful</h2>
