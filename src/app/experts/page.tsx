@@ -8,7 +8,7 @@ import Breadcrumb from "@/components/Common/Breadcrumb";
 import SEO from '@/components/Common/SEO';
 
 interface Expert {
-  id: number;
+  id: string;
   name: string;
   designation: string;
   mentorshipFocus: string;
@@ -40,8 +40,8 @@ const ExpertsPage: React.FC<ExpertsPageProps> = ({ onSelectExpert }) => {
   }, []);
 
   const experts: Expert[] = [
-    { id: 1002, name: 'Kannan Brahmaputran', designation: 'Aerospace Engineering', mentorshipFocus: 'Technical advisory', shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD.', photo: '/images/experts/kannan.jpg' },
-    { id: 5, name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
+    { id: 'A112401', name: 'Kannan Brahmaputran', designation: 'Aerospace Engineering', mentorshipFocus: 'Technical advisory', shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD.', photo: '/images/experts/kannan.jpg' },
+    { id: 'default', name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
 
   ];
 
