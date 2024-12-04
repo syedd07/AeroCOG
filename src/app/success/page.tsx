@@ -73,7 +73,7 @@ const SuccessPage = () => {
       time: appointmentDetails.time,
       userEmail: user.userEmail,
       userName: user.userName,
-      whatsappNumber: appointmentDetails.whatsappNumber,
+      // whatsappNumber: appointmentDetails.whatsappNumber,
     };
 
     try {
