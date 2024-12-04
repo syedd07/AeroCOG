@@ -1,138 +1,138 @@
 "use client";
-import { Suspense, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useSearchParams } from "next/navigation";
-import axios from "axios";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
-import { json } from "express";
+import { getAuth } from "firebase/auth";
 
+import expertsData from "@/data/expertsData";
 
-const VerifyPayment = ({ setLoading, setStep, setTransactionData }) => {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const mihpayid = searchParams.get("mihpayid");
-  
-  // Log mihpayid to check if it is correctly passed in the query parameters.
-  console.log("mihpayid from search params:", mihpayid); 
-  
-  useEffect(() => {
-    const verifyPayment = async () => {
-      console.log("Started payment verification process"); // Log when verification starts.
-
-      // Check if mihpayid is missing, log and handle the error.
-      if (!mihpayid) {
-        alert("Transaction ID not found. Please contact support@aerocog.tech");
-        router.push("/experts");
-        return;
-      }
-
-      try {
-        setStep(1); // Payment Initiated
-        console.log("Payment verification started for mihpayid:", mihpayid); // Log before making API call
-
-          // Make the API call to verify payment
-        const response = await axios.post("/api/payu/verify", { mihpayid });
-        console.log("Payment verification response:", response.data); // Log the API response
-        
-         // Check if the response status is success
-        if (response.data.status === "success") {
-          const { transactionDetails } = response.data;
-          setTransactionData(transactionDetails);
-          setStep(2); // Payment Verified
-          
-          // Log transaction details
-          console.log("Transaction details retrieved:", transactionDetails);
-
-          // Prepare Firestore document
-          const appointment = {
-            createdAt: new Date().toISOString(),
-            date: transactionDetails.date,
-            expertId: transactionDetails.expertId,
-            expertEmail: transactionDetails.expertEmail,
-            expertName: transactionDetails.expertName,
-            userEmail: transactionDetails.userEmail,
-            userName: transactionDetails.userName,
-            time: transactionDetails.time,
-            whatsappNumber: transactionDetails.whatsappNumber,
-            amount: transactionDetails.amount,
-            status: "Paid",
-          };
-          console.log("Preparing to save appointment to Firestore:", appointment); // Log appointment data
-          await addDoc(collection(db, "appointments"), appointment);
-          setStep(3); // Booking Confirmed
-        } else {
-          throw new Error("Transaction verification failed. Please contact support@aerocog.tech");
-        }
-      } catch (error) {
-        console.log("Payment verification failed with response:"); // Log failed verification
-        console.error("Error verifying payment:", error.message); // Log the error
-        alert("Payment verification failed. Please contact support@aerocog.tech");
-        router.push("/experts");
-      } finally {
-        console.log("Finalizing payment verification process."); // Log when the process finishes
-        setLoading(false); // Set loading to false after the process ends
-      }
-    };
-
-    verifyPayment();
-  }, [mihpayid]);
-
-  return null; // This component performs its logic in `useEffect`.
-};
 const SuccessPage = () => {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [step, setStep] = useState(0);
-  const [transactionData, setTransactionData] = useState(null);
+  const [step, setStep] = useState(0); // 0 = Summary, 1 = Payment Verification, 2 = Create Doc, 3 = Completed
+  const [loading, setLoading] = useState(false); // Indicates document creation
+  const [appointmentDetails, setAppointmentDetails] = useState(null);
+  const [user, setUser] = useState(null); // Authenticated user
 
-  // Log when the SuccessPage is rendered
-  console.log("SuccessPage rendered, loading state:", loading);
+  useEffect(() => {
+    // Fetch appointment details from local storage
+    const storedAppointmentDetails = JSON.parse(localStorage.getItem("appointmentDetails"));
+    setAppointmentDetails(storedAppointmentDetails);
 
-  if (loading) {
-    // Log when loading screen is displayed
-    console.log("Loading screen is active...");
+    // Get current authenticated user
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
 
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="spinner-border animate-spin inline-block w-8 h-8 border-4 rounded-full" />
-        <p className="ml-4">Verifying payment status, please wait...</p>
-      </div>
-    );
-  }
+    if (currentUser) {
+      setUser({
+        userEmail: currentUser.email,
+        userName: currentUser.displayName,
+      });
+    } else {
+      // Ensure we wait for user authentication
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          setUser({
+            userEmail: user.email,
+            userName: user.displayName,
+          });
+        }
+      });
+    }
+  }, []);
+
+
+  const handleVerifyAndProceed = async () => {
+    setStep(1); // Move to Payment Verification
+    setTimeout(() => {
+      setStep(2); // Move to Create Doc
+      handleCreateDoc(); // Start Firestore document creation
+    }, 2000);
+  };
+
+  const handleCreateDoc = async () => {
+    if (!appointmentDetails || !user) {
+      console.error("Missing required data:", { appointmentDetails, user });
+      return;
+    }
+
+    setLoading(true);
+    const expert = expertsData.find(expert => expert.id === appointmentDetails.expertId);
+    if (!expert) {
+      alert("Error fetching expert details. Contact support@aerocog.tech.");
+      setLoading(false);
+      return;
+    }
+
+    const appointmentData = {
+      createdAt: new Date().toISOString(),
+      date: appointmentDetails.date,
+      expertEmail: expert.email,
+      expertId: appointmentDetails.expertId,
+      expertName: expert.name,
+      time: appointmentDetails.time,
+      userEmail: user.userEmail,
+      userName: user.userName,
+      whatsappNumber: appointmentDetails.whatsappNumber,
+    };
+
+    try {
+      const docRef = await addDoc(collection(db, "appointments"), appointmentData);
+      setStep(3); // Move to Completed
+      router.push(`/Confirmation?bookingId=${docRef.id}`);
+    } catch (error) {
+      console.error("Error creating Firestore document:", error);
+      alert("Failed to book appointment. Contact support@aerocog.tech.");
+    } finally {
+      setLoading(false); // Stop spinner
+    }
+  };
+
   return (
-    <Suspense fallback={<div>Loading transaction details...</div>}>
-    <VerifyPayment
-      setLoading={setLoading}
-      setStep={setStep}
-      setTransactionData={setTransactionData}
-       
-      />
-      <div className="success-page-wrapper">
-        <h2 className="text-center text-xl font-bold mt-4">Transaction Successful</h2>
-        {transactionData && (
-          <div className="mt-4 text-center">
-            <p>
-              <strong>Transaction ID:</strong> {transactionData.txnId}
-            </p>
-            <p>
-              <strong>Date:</strong> {transactionData.date}
-            </p>
-            <p>
-              <strong>Amount:</strong> ₹{transactionData.amount}
-            </p>
-          </div>
-        )}
+    <div className="success-page-wrapper">
+      {step === 0 && (
+        <div className="text-center">
+          <h2 className="text-xl font-bold mb-10 mt-40 underline decoration-sky-500 underline-offset-[3px]">Appointment Summary</h2>
+          {appointmentDetails && (
+            <div>
+              <p><strong>Expert Name:</strong> Dr. {expertsData.find(expert => expert.id === appointmentDetails.expertId)?.name}</p>
+              <br />
+              <p><strong>Appointment Date:</strong> {new Date(appointmentDetails.date).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
+              <br />
+              <p><strong>Appointment Time:</strong> {appointmentDetails.time}</p>
+              <br />
+              <p><strong>WhatsApp Number:</strong> {appointmentDetails.whatsappNumber}</p>
+            </div>
+          )}
+          <button
+            onClick={handleVerifyAndProceed}
+            className="mt-4 mb-12 px-6 py-2 bg-blue-500 text-white rounded hover:bg-sky-700 ..."
+          >
+            Verify and Proceed
+          </button>
+        </div>
+      )}
 
-        <div style={{ marginTop: "200px", marginBottom: "150px", justifyItems: "center", justifyContent: "center" }}>
-          <ol className="relative text-gray-500 border-l border-gray-200 dark:border-gray-700 dark:text-gray-400 mt-8">
-            <li className={`mb-10 ml-6 ${step >= 1 ? "text-green-600" : ""}`}>
+      {step > 0 && (
+        <div className="mt-36 mb-28" style={{ justifyItems: 'center' }}>
+          <h2 className="text-center text-xl font-bold mt-4 mb-8">
+            {step === 3 ? "Appointment Booked!" : "Processing Your Appointment"}
+          </h2>
+
+          {/* Timeline Stepper */}
+          {/* Timeline Stepper */}
+          <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
+            {/* Step 1: Payment Verification */}
+            <li className="mb-10 ms-6">
               <span
-                className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${step >= 1 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"}`}
+                className={`absolute flex items-center justify-center w-8 h-8 ${step >= 1 ? "bg-green-200" : "bg-gray-100"
+                  } rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 ${step >= 1 ? "dark:bg-green-900" : "dark:bg-gray-700"
+                  }`}
               >
                 {step >= 1 ? (
                   <svg
                     className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 16 12"
@@ -142,23 +142,29 @@ const SuccessPage = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M1 5.917 5.724 10.5 15 1.5" />
+                      d="M1 5.917 5.724 10.5 15 1.5"
+                    />
                   </svg>
                 ) : (
-                  <span className="w-3.5 h-3.5 text-gray-500">1</span>
+                  <span className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400">1</span>
                 )}
               </span>
-              <h3 className="font-medium leading-tight">Payment Initiated</h3>
-              <p className="text-sm">We are verifying your payment.</p>
+              <h3 className={`font-medium leading-tight ${step >= 1 ? "text-green-500" : "text-gray-500"}`}>
+                Verifying Payment
+              </h3>
             </li>
 
-            <li className={`mb-10 ml-6 ${step >= 2 ? "text-green-600" : ""}`}>
+            {/* Step 2: Create Document */}
+            <li className="mb-10 ms-6">
               <span
-                className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${step >= 2 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"}`}
+                className={`absolute flex items-center justify-center w-8 h-8 ${step >= 2 ? "bg-green-200" : "bg-gray-100"
+                  } rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 ${step >= 2 ? "dark:bg-green-900" : "dark:bg-gray-700"
+                  }`}
               >
                 {step >= 2 ? (
                   <svg
                     className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 16 12"
@@ -168,23 +174,29 @@ const SuccessPage = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M1 5.917 5.724 10.5 15 1.5" />
+                      d="M1 5.917 5.724 10.5 15 1.5"
+                    />
                   </svg>
                 ) : (
-                  <span className="w-3.5 h-3.5 text-gray-500">2</span>
+                  <span className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400">2</span>
                 )}
               </span>
-              <h3 className="font-medium leading-tight">Payment Verified</h3>
-              <p className="text-sm">Your payment was successful.</p>
+              <h3 className={`font-medium leading-tight ${step >= 2 ? "text-green-500" : "text-gray-500"}`}>
+                Booking Your Appointment
+              </h3>
             </li>
 
-            <li className={`ml-6 ${step >= 3 ? "text-green-600" : ""}`}>
+            {/* Step 3: Confirmation */}
+            <li className="ms-6">
               <span
-                className={`absolute flex items-center justify-center w-8 h-8 rounded-full -left-4 ring-4 ring-white ${step >= 3 ? "bg-green-200 dark:bg-green-900" : "bg-gray-100 dark:bg-gray-700"}`}
+                className={`absolute flex items-center justify-center w-8 h-8 ${step === 3 ? "bg-green-200" : "bg-gray-100"
+                  } rounded-full -start-4 ring-4 ring-white dark:ring-gray-900 ${step === 3 ? "dark:bg-green-900" : "dark:bg-gray-700"
+                  }`}
               >
-                {step >= 3 ? (
+                {step === 3 ? (
                   <svg
                     className="w-3.5 h-3.5 text-green-500 dark:text-green-400"
+                    aria-hidden="true"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 16 12"
@@ -194,20 +206,26 @@ const SuccessPage = () => {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M1 5.917 5.724 10.5 15 1.5" />
+                      d="M1 5.917 5.724 10.5 15 1.5"
+                    />
                   </svg>
                 ) : (
-                  <span className="w-3.5 h-3.5 text-gray-500">3</span>
+                  <span className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400">3</span>
                 )}
               </span>
-              <h3 className="font-medium leading-tight">Booking Confirmed</h3>
-              <p className="text-sm">Your appointment is booked.</p>
+              <h3 className={`font-medium leading-tight ${step === 3 ? "text-green-500" : "text-gray-500"}`}>
+                Confirmation
+              </h3>
+              <p className={`text-sm ${step === 3 ? "text-green-500" : "text-gray-500"}`}>
+                Your appointment has been booked.
+              </p>
             </li>
           </ol>
+
+
         </div>
-      </div>
-  </Suspense>
-  
+      )}
+    </div>
   );
 };
 

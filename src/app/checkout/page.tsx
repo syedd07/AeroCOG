@@ -2,13 +2,9 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
-import { db } from "../../components/firebase";
 import { format } from "date-fns";
-import { toZonedTime } from 'date-fns-tz'; // Import the conversion function
 import Breadcrumb from "../../components/Common/Breadcrumb";
 import expertsData from "@/data/expertsData";
-import axios from "axios";
 
 const CheckoutPage = () => {
   const pageName = "Checkout";
@@ -20,18 +16,16 @@ const CheckoutPage = () => {
   const [userEmail, setUserEmail] = useState('');
   const [whatsappNumber, setWhatsappNumber] = useState('');
   const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null);
   const [expert, setExpert] = useState(null);
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setUser(user);
-        setUserName(user.displayName || '');
-        setUserEmail(user.email || '');
+        setUserName(user.displayName || "");
+        setUserEmail(user.email || "");
       } else {
-        router.push('/signin');
+        router.push("/signin");
       }
     });
 
@@ -40,15 +34,32 @@ const CheckoutPage = () => {
     const dateString = urlParams.get('date');
     const time = urlParams.get('time');
 
-    setSearchParams({ expertId, dateString, time });
+    // Only update the searchParams if they are different from the current state
+    setSearchParams((prevSearchParams) => {
+      // Ensure prevSearchParams is never null or undefined, fallback to an empty object
+      const currentParams = prevSearchParams || {};
+  
+      if (
+        currentParams.expertId !== expertId ||
+        currentParams.dateString !== dateString ||
+        currentParams.time !== time
+      ) {
+        return { expertId, dateString, time };
+      }
+      return currentParams; // No change, return previous state
+    });
 
     if (expertId) {
       const selectedExpert = expertsData.find((e) => e.id === expertId);
       setExpert(selectedExpert);
     }
 
+    // Clear previous appointment details and set the new one
+    const newAppointmentDetails = { expertId, date: dateString, time, whatsappNumber };
+    localStorage.setItem("appointmentDetails", JSON.stringify(newAppointmentDetails));
+
     return () => unsubscribe();
-  }, [router]);
+  }, [whatsappNumber, expert, searchParams, router]);   // Add whatsappNumber to dependencies to trigger when it changes
 
   if (!searchParams) {
     return <p style={{ marginTop: '200px', marginBottom: '200px', textAlign: 'center' }}>Loading...</p>;
@@ -56,7 +67,16 @@ const CheckoutPage = () => {
 
   async function initiatePayment(e) {
     e.preventDefault(); // Prevent default button or form submission behavior
-  
+    setLoading(true);
+    
+    // Ensure the latest details are in localStorage
+    const updatedDetails = {
+      expertId: searchParams.expertId,
+      date: searchParams.dateString,
+      time: searchParams.time,
+    };
+    localStorage.setItem("appointmentDetails", JSON.stringify(updatedDetails));
+
     const paymentDetails = {
       firstname: userName, // Dynamic value from the form state
       email: userEmail,    // Dynamic value from the form state
@@ -99,10 +119,11 @@ const CheckoutPage = () => {
     } catch (error) {
       console.error("Payment initiation failed:", error);
       alert("Failed to proceed to payment. Please try again.");
+    }finally {
+      setLoading(false);
     }
   }
-  
-
+ 
   const { dateString, time } = searchParams;
   const formattedDate = dateString ? new Date(dateString) : new Date();
   const isValidDate = formattedDate && !isNaN(formattedDate.getTime());
@@ -169,15 +190,15 @@ const CheckoutPage = () => {
                 type="tel"
                 value={whatsappNumber}
                 onChange={(e) => setWhatsappNumber(e.target.value)}
-                className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+                className="required border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                 placeholder="Enter your WhatsApp number"
-                required
+                
               />
             </div>
 
             <div className="text-center mt-8">
               <button
-                className="text-white bg-primary hover:bg-primary-dark w-full py-3 px-8 text-lg font-medium transition-all duration-300 rounded-md"
+                className="text-white bg-primary hover:bg-primary-dark w-full py-3 px-8 text-lg font-medium transition-all duration-300 rounded-md hover:bg-sky-700 ..."
                 onClick={(e) => {
                   console.log('Proceeding to pay...');
                   setLoading(true);
