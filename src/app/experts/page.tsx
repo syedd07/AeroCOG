@@ -41,7 +41,7 @@ const ExpertsPage: React.FC<ExpertsPageProps> = ({ onSelectExpert }) => {
 
   const experts: Expert[] = [
     { id: 'A112401', name: 'Kannan Brahmaputran', designation: 'Aerospace Engineering', mentorshipFocus: 'Technical advisory', shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD.', photo: '/images/experts/kannan.jpg' },
-    { id: 'default', name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
+    { id: 'test', name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
 
   ];
 
