@@ -211,7 +211,7 @@ const CheckoutPage = () => {
               </p>
               <br />
               <p>
-                <strong>Amount:</strong> ₹{expert ? expert.amount : 0}
+                <strong>Expert Fee:</strong> ₹{expert ? expert.amount : 0}
               </p>
             </div>
           </div>
@@ -304,6 +304,26 @@ const CheckoutPage = () => {
                 {loading ? "Processing..." : "Proceed to Pay ₹" + expert.amount}
               </button>
             </div>
+            <div className="mt-4 text-center">
+              <p className="mt-4 text-center text-sm text-gray-600">
+                By clicking on the "Proceed to Pay" button, you agree to our{" "}
+                <a
+                  href="/_docs/terms-of-use.html"
+                  className="text-primary hover:underline"
+                >
+                  Terms of Service
+                </a>{" "}
+                and{" "}
+                <a
+                  href="/_docs/privacy-policy.html"
+                  className="text-primary hover:underline"
+                >
+                  Privacy Policy
+                </a>
+                .
+              </p>
+              </div>
+              
           </form>
         </div>
       </div>
