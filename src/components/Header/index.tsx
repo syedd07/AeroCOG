@@ -170,6 +170,7 @@ const Header = () => {
                   >
                     Sign Out
                   </button>
+                  
                   <Link
                     href="/profile"  // Profile link for logged-in users
                     className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"

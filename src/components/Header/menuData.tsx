@@ -1,5 +1,6 @@
 import { Menu } from "@/types/menu";
 
+
 const menuData: Menu[] = [
   {
     id: 1,
@@ -13,20 +14,15 @@ const menuData: Menu[] = [
     path: "/about",
     newTab: false,
   },
+
   {
-    id: 22,
-    title: "Experts",
-    path: "/experts",
+    id: 33,
+    title: "Profile",
     newTab: false,
+    path: "/profile",
+
   },
 
-  
-  {
-    id: 5,
-    title: "Expert Sign Up",
-    path: "/signup-expert",
-    newTab: false,
-  },
 
   {
     id: 46,
@@ -36,33 +32,31 @@ const menuData: Menu[] = [
   },
 
   {
+    id: 3,
+    title: "Support",
+    path: "/contact",
+    newTab: false,
+  },
+
+  {
     id: 4,
     title: "Pages",
     newTab: false,
     submenu: [
-
       {
-        id: 33,
-        title: "Profile",
+        id: 22,
+        title: "Experts",
+        path: "/experts",
         newTab: false,
-        path: "/profile",
-
       },
 
       {
         id: 34,
         title: "Expert login",
-        path:"https://dashboard.aerocog.tech",
+        path: "https://dashboard.aerocog.tech",
         newTab: true,
       },
-
-      {
-        id: 3,
-        title: "Support",
-        path: "/contact",
-        newTab: false,
-      },
-
+      
       {
         id: 47,
         title: "Sign Up",

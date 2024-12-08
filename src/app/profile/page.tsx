@@ -15,6 +15,7 @@ import { format } from "date-fns";
 import Breadcrumb from "../../components/Common/Breadcrumb";
 import SEO from "@/components/Common/SEO";
 import Alert from "@/components/Common/CustomAlert"; // Import the Alert component
+import { toast } from "react-hot-toast";
 
 const Profile = () => {
   const pageName = "Profile";
@@ -65,6 +66,7 @@ const Profile = () => {
           type: "success",
           message: "Password reset email sent successfully.",
         });
+        toast.success("Password reset email sent successfully.");
       } catch (error) {
         console.error("Error sending password reset email: ", error);
         setError("Failed to send reset email. Please try again.");
@@ -88,6 +90,7 @@ const Profile = () => {
       } else {
         setError("No user found. Please Sign-in.");
         setLoading(false);
+        toast.error("No user found. Please Sign-in.");
         router.push("/signin");
       }
     });
@@ -134,6 +137,7 @@ const Profile = () => {
 
   const handleSignOut = () => {
     signOut(auth);
+    toast.success("Signed out successfully.");
     router.push("/");
   };
 
@@ -141,6 +145,7 @@ const Profile = () => {
   const handleUpdateProfile = async () => {
     if (newEmail.trim() === "") {
       setError("Please enter a valid email.");
+      toast.error("Please enter a valid email.");
       return;
     }
 
@@ -314,7 +319,7 @@ const Profile = () => {
             </button>
             <div className={styles.info} id="login">
               <br />
-              <span className={styles.infoLabel}>Last Login:</span>
+              <span className={styles.infoLabel}>Last Login: </span>
               {user?.metadata?.lastSignInTime
                 ? new Date(user.metadata.lastSignInTime).toLocaleString()
                 : "N/A"}

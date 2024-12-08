@@ -21,8 +21,8 @@ const Features: React.FC = () => {
             ))}
           </div>
         </div>
-        <div style={{justifyItems:'center', WebkitJustifyContent: 'center', marginTop: '30px', }}>
-            <CustomButton />
+        <div>
+          <CustomButton />
         </div>
       </section>
     </>

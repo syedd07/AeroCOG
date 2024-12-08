@@ -23,6 +23,7 @@ export default function RootLayout({
         head.js. Find out more at https://beta.nextjs.org/docs/api-reference/file-conventions/head
       */}
       <head />
+      
 
       <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
         <Toaster position="top-right" reverseOrder={false} />
@@ -33,6 +34,7 @@ export default function RootLayout({
           <ScrollToTop />
         </Providers>
       </body>
+      
     </html>
   );
 }
