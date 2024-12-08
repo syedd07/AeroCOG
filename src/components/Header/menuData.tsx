@@ -23,7 +23,7 @@ const menuData: Menu[] = [
   
   {
     id: 5,
-    title: "Sign Up as Expert",
+    title: "Expert Sign Up",
     path: "/signup-expert",
     newTab: false,
   },

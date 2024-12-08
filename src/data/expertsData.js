@@ -15,7 +15,8 @@ const expertsData = [
     email: 'kanfb99@yahoo.com',
     socialLinks: [
       { platform: 'LinkedIn', link: 'https://www.linkedin.com/in/kannan-brahmaputran-90091645/' }
-    ]
+    ],
+    amount: 499
   },
   
   
@@ -33,7 +34,8 @@ const expertsData = [
     ],
     socialLinks: [
       { platform: 'LinkedIn', link: 'https://www.linkedin.com/in/janesmith' }
-    ]
+    ],
+    amount: 1
   },
  
   // More experts data...

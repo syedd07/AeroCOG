@@ -6,8 +6,8 @@ import ScrollToTop from "@/components/ScrollToTop";
 import { Inter } from "next/font/google";
 import "node_modules/react-modal-video/css/modal-video.css";
 import "../styles/index.css";
-//import { auth } from "../components/firebase"; 
-
+import { Toaster } from "react-hot-toast";
+//import { auth } from "../components/firebase";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -25,6 +25,7 @@ export default function RootLayout({
       <head />
 
       <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
+        <Toaster position="top-right" reverseOrder={false} />
         <Providers>
           <Header />
           {children}

@@ -34,6 +34,7 @@
     "react-calendar": "^5.1.0",
     "react-dom": "^18.3.1",
     "react-firebase-hooks": "^5.1.1",
+    "react-hot-toast": "^2.4.1",
     "react-modal-video": "^2.0.1",
     "sharp": "^0.33.5"
   },

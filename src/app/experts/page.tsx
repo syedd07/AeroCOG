@@ -14,6 +14,7 @@ interface Expert {
   mentorshipFocus: string;
   shortIntro: string;
   photo: string;
+  amount: number;
 
 }
 interface ExpertsPageProps {
@@ -37,8 +38,8 @@ const ExpertsPage: React.FC<ExpertsPageProps> = ({ onSelectExpert }) => {
   }, []);
 
   const experts: Expert[] = [
-    { id: 'A112401', name: 'Kannan Brahmaputran', designation: 'Aerospace Engineering', mentorshipFocus: 'Technical advisory', shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD.', photo: '/images/experts/kannan.jpg' },
-    { id: 'test', name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
+    { id: 'A112401', name: 'Kannan Brahmaputran', designation: 'Aerospace Engineering', mentorshipFocus: 'Technical advisory', shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD.', photo: '/images/experts/kannan.jpg', amount: 499 },
+    // { id: 'test', name: 'Yousuf Ali', designation: 'Web Dev', shortIntro: 'Focused on nothing!', mentorshipFocus: '', photo: '/images/experts/ali.jpg' },
 
   ];
 
@@ -55,19 +56,21 @@ const ExpertsPage: React.FC<ExpertsPageProps> = ({ onSelectExpert }) => {
       />
 
       <section className="pb-[120px] pt-[120px]">
-        <div className="container" style={{ backgroundColor: 'transparent' }}>
+        <div className="container" style={{ backgroundColor: 'transparent' }} >
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {experts.map((expert) => (
               <div
                 key={expert.id}
                 onClick={() => handleSelectExpert(expert)}
                 className="cursor-pointer transform transition duration-300 hover:scale-105"
+                
               >
                 <ExpertCard expert={expert} />
               </div>
             ))}
           </div>
 
+          {/* pegination */}
 
           <div className="-mx-4 flex flex-wrap" data-wow-delay=".15s">
             <div className="w-full px-4">

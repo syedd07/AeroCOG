@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/Common/Breadcrumb';
 import SEO from '@/components/Common/SEO';
 import Alert from '@/components/Common/CustomAlert';
+import { toast } from 'react-hot-toast';
 
 const auth = getAuth();
 const user = auth.currentUser;
@@ -192,6 +193,7 @@ const ExpertSignUpForm = () => {
       console.error("Error adding document: ", error);
       setAlert({ type: 'danger', message: "Failed to create profile. Contact support." })
     }
+    toast.success('Expert Application Submitted successfully!'); // Display a success message
     router.push('/');
   };
 
@@ -336,21 +338,7 @@ const ExpertSignUpForm = () => {
               )}
             </div>
             )}
-          {/* {step >= 6 && (
-            <div className={styles.step}>
-              <label className="block mb-2 text-sm font-medium text-gray-900 dark:text-white" htmlFor="file_input">Photo:</label>
-              <input
-                id='file_input'
-                type="file"
-                name="photo"
-                onChange={handlePhotoChange}
-                accept="image/*"
-                className= "block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" id="file_input" type="file"
-                required
-              />
-              {isLoading && <div className="loading-spinner"> Please wait Uploading...</div>} 
-            </div>
-          )} */}
+          
           {step >= 7 && (
             <div className={styles.step}>
               <label className="mb-3 block text-sm text-dark dark:text-white">Notable Projects:</label>

@@ -4,23 +4,26 @@ import Link from "next/link";
 import { useState } from "react";
 //import { useRouter } from "next/compat/router";
 import { FirebaseError } from "firebase/app";
-import { useRouter } from 'next/navigation';
-import SEO from '@/components/Common/SEO';
+import { useRouter } from "next/navigation";
+import SEO from "@/components/Common/SEO";
+import Alert from "@/components/Common/CustomAlert";
+import { toast } from 'react-hot-toast';
 
 import {
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   GithubAuthProvider,
-} from 'firebase/auth';
-import { auth } from '../../components/firebase';
+} from "firebase/auth";
+import { auth } from "../../components/firebase";
 
 const SigninPage = () => {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
+  const [alert, setAlert] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Google and GitHub provider instances
   const googleProvider = new GoogleAuthProvider();
@@ -32,10 +35,17 @@ const SigninPage = () => {
       await signInWithPopup(auth, googleProvider);
       //console.log("Signed in with Google");
       setTimeout(() => {
+        setLoading(true);
+        toast.success('Logged in! 🚀'); // Displays a success message
         router.push("/");
-      }, 3000); // 3 seconds delay
+      }, 1000); // 1 seconds delay
     } catch (error) {
       console.error("Error with Google Sign In", error);
+      setAlert({
+        type: "danger",
+        message:
+          "Error signing in with google. Please try again or use your email.",
+      });
     }
   };
 
@@ -44,9 +54,15 @@ const SigninPage = () => {
     try {
       await signInWithPopup(auth, githubProvider);
       //console.log("Signed in with GitHub");
+      toast.success('Logged in!'); // Displays a success message
       router.push("/");
     } catch (error) {
       console.error("Error with GitHub Sign In", error);
+      setAlert({
+        type: "danger",
+        message:
+          "Error signing in with GitHub. Please try again or use your email.",
+      });
     }
   };
 
@@ -62,26 +78,31 @@ const SigninPage = () => {
       }
       await signInWithEmailAndPassword(auth, email, password);
       //console.log("Signed in with Email and Password");
+      toast.success('Logged in!'); // Displays a success message
       router.push("/");
     } catch (error) {
       if (error instanceof FirebaseError) {
         switch (error.code) {
-          case 'auth/invalid-email':
+          case "auth/invalid-email":
             setError("Invalid email format.");
             break;
-          case 'auth/user-not-found':
+          case "auth/user-not-found":
             setError("User not found.");
             break;
-          case 'auth/wrong-password':
+          case "auth/wrong-password":
             setError("Incorrect password.");
             break;
           default:
             setError("Error signing in. Please try again.");
-            console.error("Firebase error:", error);
+            console.error("Database error:", error);
         }
       } else {
         setError("An unexpected error occurred. Please try again.");
         console.error("Unexpected error:", error);
+        setAlert({
+          type: "danger",
+          message: "An unexpected error occurred. Please try again.",
+        });
       }
     }
   };
@@ -97,7 +118,7 @@ const SigninPage = () => {
         <div className="container">
           <div className="-mx-4 flex flex-wrap">
             <div className="w-full px-4">
-              <div className="shadow-three mx-auto max-w-[500px] rounded bg-white px-6 py-10 dark:bg-dark sm:p-[60px]">
+              <div className="mx-auto max-w-[500px] rounded bg-white px-6 py-10 shadow-three dark:bg-dark sm:p-[60px]">
                 <h3 className="mb-3 text-center text-2xl font-bold text-black dark:text-white sm:text-3xl">
                   Sign in to your account
                 </h3>
@@ -106,7 +127,8 @@ const SigninPage = () => {
                 </p>
                 <button
                   onClick={handleGoogleSignIn}
-                  className="border-stroke dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none">
+                  className="border-stroke mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none"
+                >
                   <span className="mr-3">
                     <svg
                       width="20"
@@ -145,7 +167,8 @@ const SigninPage = () => {
 
                 <button
                   onClick={handleGithubSignIn}
-                  className="border-stroke dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none">
+                  className="border-stroke mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none"
+                >
                   <span className="mr-3">
                     <svg
                       fill="currentColor"
@@ -166,17 +189,25 @@ const SigninPage = () => {
                   </p>
                   <span className="hidden h-[1px] w-full max-w-[70px] bg-body-color/50 sm:block"></span>
                 </div>
+                <div>
+                  {/* Render the alert if it exists */}
 
-                {/*
-                form strt here!
-                */}
-                {error && <p className="text-red-500 text-center">{error}</p>}
+                  {alert && (
+                    <Alert
+                      type={alert.type}
+                      message={alert.message}
+                      onClose={() => setAlert(null)}
+                    />
+                  )}
+                </div>
+
+                {/* form strt here! */}
+                {error && <p className="text-center text-red-500">{error}</p>}
                 <form onSubmit={handleEmailSignIn}>
                   <div className="mb-8">
                     <label
                       htmlFor="email"
                       className="mb-3 block text-sm text-dark dark:text-white"
-
                     >
                       Your Email
                     </label>
@@ -185,7 +216,7 @@ const SigninPage = () => {
                       name="email"
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="Enter your Email"
-                      className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+                      className="border-stroke w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                     />
                   </div>
                   <div className="mb-8">
@@ -200,7 +231,7 @@ const SigninPage = () => {
                       name="password"
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter your Password"
-                      className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
+                      className="border-stroke w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                     />
                   </div>
                   <div className="mb-8 flex flex-col justify-between sm:flex-row sm:items-center">
@@ -247,8 +278,10 @@ const SigninPage = () => {
                     </div> */}
                   </div>
                   <div className="mb-6">
-                    <button type="submit"
-                      className="shadow-submit dark:shadow-submit-dark flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white duration-300 hover:bg-primary/90">
+                    <button
+                      type="submit"
+                      className="flex w-full items-center justify-center rounded-sm bg-primary px-9 py-4 text-base font-medium text-white shadow-submit duration-300 hover:bg-primary/90 dark:shadow-submit-dark"
+                    >
                       Sign in
                     </button>
                   </div>
