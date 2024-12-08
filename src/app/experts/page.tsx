@@ -16,9 +16,6 @@ interface Expert {
   photo: string;
 
 }
-
-
-
 interface ExpertsPageProps {
   onSelectExpert?: (expert: Expert) => void;
 }

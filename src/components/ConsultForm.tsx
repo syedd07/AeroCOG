@@ -4,14 +4,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { format } from 'date-fns';
-import CustomAlert from './CustomAlert';
 import expertsData from '@/data/expertsData';
+import Alert from './Common/CustomAlert';
 
 
 const ConsultForm = ({ selectedExpert }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-
+  
   // Fetch expert ID and name from URL parameters
   const expertId = searchParams.get('expertId');
   const expertName = searchParams.get('expertName');
@@ -76,8 +76,8 @@ const ConsultForm = ({ selectedExpert }) => {
       );
     } else {
       setAlert({
-        message: 'Please select a date, time, and time slot.',
-        type: 'error',
+        message: 'Please select a date, and time slot.',
+        type: 'danger',
       });
 
     }
@@ -90,13 +90,7 @@ const ConsultForm = ({ selectedExpert }) => {
   return (
     <div className="consult-form-wrapper" style={{ backgroundColor: 'transparent' }}>
       <div className="consult-form-container mx-auto p-6 max-w-lg rounded-lg shadow-md">
-        {alert && (
-          <CustomAlert
-            message={alert.message}
-            type={alert.type}
-            onClose={() => setAlert(null)}
-          />
-        )}
+        
 
         {/* Expert Details Section */}
         <div className="text-center mb-8">
@@ -112,6 +106,14 @@ const ConsultForm = ({ selectedExpert }) => {
           <h2 className="text-3xl font-semibold mt-4">Dr. {expert.name}</h2>
           <p className="text-xl text-gray-600">{expert.designation}</p>
         </div>
+          {/* Alert */}
+        {alert && (
+          <Alert
+            message={alert.message}
+            type="danger"
+            onClose={() => setAlert(null)}
+          />
+        )}
 
         {/* Date Selection */}
         <h4>Select a Date</h4>
@@ -148,6 +150,7 @@ const ConsultForm = ({ selectedExpert }) => {
 
         {/* Time Slot Selection */}
         <h4>Select a Time Slot</h4>
+        <br />
         <div className="time-slot-buttons flex justify-center space-x-4">
           {timeSlots.map((slot) => (
             <button
@@ -172,12 +175,12 @@ const ConsultForm = ({ selectedExpert }) => {
         <br />
         <span>
           By consulting, means you agree to the
-          <a href="/documents" className="text-primary hover:underline">
+          <a href="/_docs/terms-of-use.html" className="text-primary hover:underline" target='_blank'>
             {" "}
             Consultation Policy{" "}
           </a>
           , and our
-          <a href="/documnets" className="text-primary hover:underline">
+          <a href="/_docs/privacy-policy.html" className="text-primary hover:underline" target='_black'>
             {" "}
             Privacy Policy{" "}
 

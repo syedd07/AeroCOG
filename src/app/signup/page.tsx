@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 //import { useRouter } from 'next/navigation';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import SEO from "@/components/Common/SEO";
+import Alert from "@/components/Common/CustomAlert";
 
 import {
   signInWithPopup,
@@ -21,6 +22,7 @@ const SignupPage = () => {
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [alert, setAlert] = useState(null);
 
   // Initialize Firebase Authentication
   const authInstance = getAuth();
@@ -36,7 +38,7 @@ const SignupPage = () => {
       //  console.log("Signed in with Google");
       // Send email verification
       await sendEmailVerification(userCredential.user);
-      alert("Please verify your email before logging in.");
+      setAlert ({type : "warning", message : "Please verify your email before logging in."})
       setIsAuthenticated(true);
 
     } catch (error) {
@@ -52,7 +54,7 @@ const SignupPage = () => {
       //  console.log("Signed in with GitHub");
       // Send email verification
       await sendEmailVerification(userCredential.user);
-      alert("Please verify your email before logging in.");
+      setAlert ({type : "warning", message : "Please verify your email before logging in."})
       setIsAuthenticated(true);
 
     } catch (error) {
@@ -69,7 +71,7 @@ const SignupPage = () => {
       const user = userCredential.user;
       // Send email verification
       await sendEmailVerification(userCredential.user);
-      alert("Please verify your email before logging in.");
+      setAlert ({ type :"warning", message :"Please verify your email before logging in."})
 
       setIsAuthenticated(true);
     } catch (err) {
@@ -101,6 +103,14 @@ const SignupPage = () => {
                 <p className="mb-11 text-center text-base font-medium text-body-color">
                   It&apos;s totally free and super easy
                 </p>
+                <div>
+                  {alert && 
+                  <Alert 
+                  type={alert.type} 
+                  message={alert.message} 
+                  onClose={() => setAlert(null)}
+                  />}
+                </div>
                 <button
                   onClick={handleGoogleSignIn}
                   className="border-stroke dark:text-body-color-dark dark:shadow-two mb-6 flex w-full items-center justify-center rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-transparent dark:bg-[#2C303B] dark:hover:border-primary dark:hover:bg-primary/5 dark:hover:text-primary dark:hover:shadow-none">

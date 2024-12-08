@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
 import { getAuth } from "firebase/auth";
+import Alert from "@/components/Common/CustomAlert";  // Import the Alert component
 
 import expertsData from "@/data/expertsData";
 
@@ -13,11 +14,20 @@ const SuccessPage = () => {
   const [loading, setLoading] = useState(false); // Indicates document creation
   const [appointmentDetails, setAppointmentDetails] = useState(null);
   const [user, setUser] = useState(null); // Authenticated user
+  const [alert, setAlert] = useState(null); // State for managing alerts
 
   useEffect(() => {
     // Fetch appointment details from local storage
     const storedAppointmentDetails = JSON.parse(localStorage.getItem("appointmentDetails"));
     setAppointmentDetails(storedAppointmentDetails);
+
+    if (!storedAppointmentDetails) {
+      // Alert the user if no appointment details are found in local storage
+      setAlert({ type: 'danger', message: `Either you've not done the payment or there is a technical error in the backend, If you have done the payemnt. Please contact support@aerocog.tech` });
+
+    } else {
+      setAppointmentDetails(storedAppointmentDetails);
+    }
 
     // Get current authenticated user
     const auth = getAuth();
@@ -53,13 +63,14 @@ const SuccessPage = () => {
   const handleCreateDoc = async () => {
     if (!appointmentDetails || !user) {
       console.error("Missing required data:", { appointmentDetails, user });
+      setAlert({ type: 'danger', message: "Error creating appointment. Contact support@aerocog.tech" });
       return;
     }
 
     setLoading(true);
     const expert = expertsData.find(expert => expert.id === appointmentDetails.expertId);
     if (!expert) {
-      alert("Error fetching expert details. Contact support@aerocog.tech.");
+      setAlert({ type: 'danger', message: "Error fetching expert details. Contact support@aerocog.tech." });
       setLoading(false);
       return;
     }
@@ -79,10 +90,13 @@ const SuccessPage = () => {
     try {
       const docRef = await addDoc(collection(db, "appointments"), appointmentData);
       setStep(3); // Move to Completed
+
+      // Clear local storage for security reasons (AFTER document creation)
+      localStorage.removeItem("appointmentDetails");
       router.push(`/Confirmation?bookingId=${docRef.id}`);
     } catch (error) {
       console.error("Error creating Firestore document:", error);
-      alert("Failed to book appointment. Contact support@aerocog.tech.");
+      setAlert({ type: 'danger', message: "Failed to book appointment. Contact support@aerocog.tech." });
     } finally {
       setLoading(false); // Stop spinner
     }
@@ -93,15 +107,26 @@ const SuccessPage = () => {
       {step === 0 && (
         <div className="text-center">
           <h2 className="text-xl font-bold mb-10 mt-40 underline decoration-sky-500 underline-offset-[3px]">Appointment Summary</h2>
+          <div>
+            {/* Render the alert if it exists */}
+            {alert &&
+              <Alert
+                type={alert.type}
+                message={alert.message}
+                onClose={() => setAlert(null)}
+              />}
+          </div>
           {appointmentDetails && (
             <div>
               <p><strong>Expert Name:</strong> Dr. {expertsData.find(expert => expert.id === appointmentDetails.expertId)?.name}</p>
+              <br />
+              <p><strong>Expert Id: </strong>{expertsData.find(expert => expert.id === appointmentDetails.expertId)?.id}</p>
               <br />
               <p><strong>Appointment Date:</strong> {new Date(appointmentDetails.date).toLocaleDateString("en-IN", { timeZone: "Asia/Kolkata" })}</p>
               <br />
               <p><strong>Appointment Time:</strong> {appointmentDetails.time}</p>
               <br />
-              <p><strong>WhatsApp Number:</strong> {appointmentDetails.whatsappNumber}</p>
+              <p><strong>Mobile Number:</strong> {appointmentDetails.whatsappNumber}</p>
             </div>
           )}
           <button
@@ -119,8 +144,17 @@ const SuccessPage = () => {
             {step === 3 ? "Appointment Booked!" : "Processing Your Appointment"}
           </h2>
 
+          {/* Render the alert if it exists */}
+          {alert &&
+            <Alert
+              type={alert.type}
+              message={alert.message}
+              onClose={() => setAlert(null)}
+            />}
+            <br />
+
           {/* Timeline Stepper */}
-          {/* Timeline Stepper */}
+
           <ol className="relative text-gray-500 border-s border-gray-200 dark:border-gray-700 dark:text-gray-400">
             {/* Step 1: Payment Verification */}
             <li className="mb-10 ms-6">

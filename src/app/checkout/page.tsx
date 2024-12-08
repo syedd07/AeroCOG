@@ -5,8 +5,10 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { format } from "date-fns";
 import Breadcrumb from "../../components/Common/Breadcrumb";
 import expertsData from "@/data/expertsData";
+import Alert from "../../components/Common/CustomAlert";
 
 const CheckoutPage = () => {
+  const [alert, setAlert] = useState(null); // State for managing alerts
   const pageName = "Checkout";
   const description = "Review your consultation details and complete the booking process.";
   const router = useRouter();
@@ -38,7 +40,7 @@ const CheckoutPage = () => {
     setSearchParams((prevSearchParams) => {
       // Ensure prevSearchParams is never null or undefined, fallback to an empty object
       const currentParams = prevSearchParams || {};
-  
+
       if (
         currentParams.expertId !== expertId ||
         currentParams.dateString !== dateString ||
@@ -68,7 +70,7 @@ const CheckoutPage = () => {
   async function initiatePayment(e) {
     e.preventDefault(); // Prevent default button or form submission behavior
     setLoading(true);
-    
+
     // Ensure the latest details are in localStorage
     const updatedDetails = {
       expertId: searchParams.expertId,
@@ -85,7 +87,7 @@ const CheckoutPage = () => {
       txnid: "txn_" + new Date().getTime(), // Unique transaction ID
       phone: whatsappNumber, // Dynamic value from the form state
     };
-  
+
     try {
       // Call the backend to get the payment payload
       const response = await fetch("/api/payu/initiate", {
@@ -95,15 +97,15 @@ const CheckoutPage = () => {
         },
         body: JSON.stringify(paymentDetails),
       });
-  
+
       const { payload } = await response.json();
-  
+
       if (payload) {
         // Redirect to PayU with the generated payload
         const payuForm = document.createElement("form");
         payuForm.method = "POST";
         payuForm.action = "https://secure.payu.in/_payment";
-  
+
         // Add payload fields to the form
         for (const key in payload) {
           const input = document.createElement("input");
@@ -112,18 +114,18 @@ const CheckoutPage = () => {
           input.value = payload[key];
           payuForm.appendChild(input);
         }
-  
+
         document.body.appendChild(payuForm);
         payuForm.submit();
       }
     } catch (error) {
       console.error("Payment initiation failed:", error);
-      alert("Failed to proceed to payment. Please try again.");
-    }finally {
+      setAlert({ type: "danger", message: "Failed to proceed to payment. Please try again." })
+    } finally {
       setLoading(false);
     }
   }
- 
+
   const { dateString, time } = searchParams;
   const formattedDate = dateString ? new Date(dateString) : new Date();
   const isValidDate = formattedDate && !isNaN(formattedDate.getTime());
@@ -157,6 +159,15 @@ const CheckoutPage = () => {
           </div>
 
           <h4 className="text-2xl font-semibold mt-6 mb-4">Check Your Details</h4>
+          <div>
+            {/* Render the alert if it exists */}
+            {alert && 
+            <Alert 
+            type={alert.type} 
+            message={alert.message} 
+            onClose={() => setAlert(null)}
+            />}
+          </div>
           <form className="space-y-6">
             <div className="input-group">
               <label htmlFor="userName" className="mb-3 block text-sm text-dark dark:text-white">Your Name</label>
@@ -192,7 +203,7 @@ const CheckoutPage = () => {
                 onChange={(e) => setWhatsappNumber(e.target.value)}
                 className="required border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                 placeholder="Enter your WhatsApp number"
-                
+
               />
             </div>
 

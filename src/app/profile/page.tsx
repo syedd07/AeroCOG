@@ -8,11 +8,13 @@ import styles from './profile.module.css';
 import { format } from 'date-fns';
 import Breadcrumb from '../../components/Common/Breadcrumb';
 import SEO from '@/components/Common/SEO';
+import Alert from "@/components/Common/CustomAlert";  // Import the Alert component
 
 const Profile = () => {
   const pageName = "Profile";
   const description = "";
   const router = useRouter();
+  const [alert, setAlert] = useState(null); // State for managing alerts
 
   // State for user data and UI handling
   const [user, setUser] = useState<any>(null);
@@ -53,7 +55,7 @@ const Profile = () => {
     if (user?.email) {
       try {
         await sendPasswordResetEmail(auth, user.email);
-        alert("Password reset email sent successfully.");
+        setAlert ({type:"success", message:"Password reset email sent successfully."}) 
       } catch (error) {
         console.error("Error sending password reset email: ", error);
         setError("Failed to send reset email. Please try again.");
@@ -76,7 +78,7 @@ const Profile = () => {
         setNewEmail(user.email || "");
 
       } else {
-        setError("No user found.");
+        setError("No user found. Please Sign-in.");
         setLoading(false);
         router.push("/signin");
       }
@@ -123,11 +125,11 @@ const Profile = () => {
         if (validEmail !== user.email) {
           await updateEmail(user, validEmail); // Update email
           await sendEmailVerification(user); // Send verification email for new email
-          alert("Please verify your new email address.");
+          setAlert ({type : "info", message:"Please verify your new email address."})
         }
 
         setError(null); // Clear any previous errors
-        alert("Profile updated successfully. Please verify your email address.");
+        setAlert ({type : "success", message: "Profile updated successfully. Please verify your email address."})
       }
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -189,9 +191,18 @@ const Profile = () => {
             My Appointments
           </button>
         </div>
+        
+        {/* Render the alert if it exists */}
 
+        {alert &&
+          <Alert
+            type={alert.type}
+            message={alert.message}
+            onClose={() => setAlert(null)}
+          />
+        }
+        
         {/* "My Profile" Tab */}
-
         {activeTab === "profile" && (
           <div className={styles.profileContent}>
             <h2>Profile Information</h2>
