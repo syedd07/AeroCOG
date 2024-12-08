@@ -306,7 +306,7 @@ const CheckoutPage = () => {
             </div>
             <div className="mt-4 text-center">
               <p className="mt-4 text-center text-sm text-gray-600">
-                By clicking on the "Proceed to Pay" button, you agree to our{" "}
+                By clicking on the &#8220 Proceed to Pay &#8221 button, you agree to our{" "}
                 <a
                   href="/_docs/terms-of-use.html"
                   className="text-primary hover:underline"
