@@ -2,20 +2,20 @@
 import React from "react";
 import Link from "next/link";
 import { useState } from "react";
-//import { useRouter } from "next/compat/router";
 import { FirebaseError } from "firebase/app";
 import { useRouter } from "next/navigation";
 import SEO from "@/components/Common/SEO";
 import Alert from "@/components/Common/CustomAlert";
 import { toast } from 'react-hot-toast';
-
 import {
+  getAuth,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
   GithubAuthProvider,
 } from "firebase/auth";
-import { auth } from "../../components/firebase";
+import { auth } from "@/components/firebase";
 
 const SigninPage = () => {
   const router = useRouter();
@@ -24,6 +24,9 @@ const SigninPage = () => {
   const [error, setError] = useState("");
   const [alert, setAlert] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+
+
 
   // Google and GitHub provider instances
   const googleProvider = new GoogleAuthProvider();
@@ -68,43 +71,53 @@ const SigninPage = () => {
 
   // Event handler for email/password sign-in
   const handleEmailSignIn = async (event: React.FormEvent) => {
-    event.preventDefault(); // Prevent form from submitting
-    // console.log("Email:", email);  // Confirm email value
-    //console.log("Password:", password);  // Confirm password value
+    event.preventDefault();
     try {
       if (!email || !password) {
-        setError("Email and password cannot be empty.");
+        toast.error("Email and password cannot be empty.",
+          {
+            position: "bottom-center"
+          }
+        );
         return;
       }
+      setLoading(true);
       await signInWithEmailAndPassword(auth, email, password);
-      //console.log("Signed in with Email and Password");
-      toast.success('Logged in!'); // Displays a success message
+      toast.success("Logged in successfully!");
       router.push("/");
     } catch (error) {
-      if (error instanceof FirebaseError) {
-        switch (error.code) {
-          case "auth/invalid-email":
-            setError("Invalid email format.");
-            break;
-          case "auth/user-not-found":
-            setError("User not found.");
-            break;
-          case "auth/wrong-password":
-            setError("Incorrect password.");
-            break;
-          default:
-            setError("Error signing in. Please try again.");
-            console.error("Database error:", error);
-        }
+      const errorMessage = error instanceof FirebaseError
+        ? getFirebaseErrorMessage(error.code)
+        : "An unexpected error occurred. Please try again.";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Password reset handler
+  const handleResetPassword = async () => {
+    const auth = getAuth();
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast.success("A password reset email has been sent to your registered email ID.");
+    } catch (error) {
+      if (error.code === "auth/user-not-found") {
+        toast.error("No account found with this email address.");
       } else {
-        setError("An unexpected error occurred. Please try again.");
-        console.error("Unexpected error:", error);
-        setAlert({
-          type: "danger",
-          message: "An unexpected error occurred. Please try again.",
-        });
+        toast.error("An error occurred. Please try again.");
       }
     }
+  };
+
+  // Map Firebase error codes to friendly messages
+  const getFirebaseErrorMessage = (code: string) => {
+    const messages: { [key: string]: string } = {
+      "auth/invalid-email": "Invalid email format.",
+      "auth/user-not-found": "User not found.",
+      "auth/wrong-password": "Incorrect password.",
+    };
+    return messages[code] || "Error signing in. Please try again.";
   };
 
   return (
@@ -209,7 +222,7 @@ const SigninPage = () => {
                       htmlFor="email"
                       className="mb-3 block text-sm text-dark dark:text-white"
                     >
-                      Your Email
+                      Email
                     </label>
                     <input
                       type="email"
@@ -224,7 +237,7 @@ const SigninPage = () => {
                       htmlFor="password"
                       className="mb-3 block text-sm text-dark dark:text-white"
                     >
-                      Your Password
+                      Password
                     </label>
                     <input
                       type="password"
@@ -234,6 +247,7 @@ const SigninPage = () => {
                       className="border-stroke w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
                     />
                   </div>
+
                   <div className="mb-8 flex flex-col justify-between sm:flex-row sm:items-center">
                     <div className="mb-4 sm:mb-0">
                       <label
@@ -268,14 +282,41 @@ const SigninPage = () => {
                         Keep me signed in
                       </label>
                     </div>
-                    {/* <div>
-                      <a
-                        href="#0"
+                    {!showForgotPassword && (
+                    <div>
+                      <button
+                        onClick={() => setShowForgotPassword(true)}
                         className="text-sm font-medium text-primary hover:underline"
                       >
                         Forgot Password?
-                      </a>
-                    </div> */}
+                      </button>
+                    </div>
+                    )}
+                      {showForgotPassword && (
+                      <div className="mb-3 block text-sm text-dark dark:text-white">
+                          <h3>Reset Password</h3>
+                          <input
+                            type="email"
+                            placeholder="Enter your registered email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="border-stroke w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:text-body-color-dark dark:shadow-two dark:focus:border-primary dark:focus:shadow-none"
+                          />
+                          <button 
+                          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+                          onClick={handleResetPassword} 
+                          >
+                            Send Reset Email
+                            </button>
+                          <button 
+                          className="focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900"
+                          onClick={() => setShowForgotPassword(false)}
+                          >
+                            Cancel
+                            </button>
+                        </div>
+                      )}
+                    
                   </div>
                   <div className="mb-6">
                     <button

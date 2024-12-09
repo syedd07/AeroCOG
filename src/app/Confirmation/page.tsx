@@ -262,7 +262,8 @@ const ConfirmationContent = () => {
       <br />
       <p className='text-center'>If you have any questions, feel free to get in touch! <a className='text-primary hover:underline' href='mailto:support@aerocog.tech'>support</a></p>
       <br />
-      <p className='text-center'>You can view your appointment <a href='/profile'>here</a></p>
+      <p className='text-center'>You can view your appointment <a className='text-primary hover:underline' href='/profile'>here</a></p>
+      <br />
       <a className='text-center text-primary hover:underline' href='/'>Go back to home</a>
       
       </div>

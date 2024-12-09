@@ -29,7 +29,7 @@ export default function RootLayout({
       <body className={`bg-[#FCFCFC] dark:bg-black ${inter.className}`}>
       
         <Providers>
-         <Toaster position="top-right" reverseOrder={false} />
+          <Toaster position="top-right" reverseOrder={false} />
           <Header />
           {children}
           <Footer />
