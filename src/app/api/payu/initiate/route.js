@@ -34,9 +34,9 @@ export const POST = async (req) => {
       email,             // Customer's Email
       phone,             // Customer's Phone (optional)
       service_provider: "payu_paisa", // Service Provider
-      surl: "https://aerocog.tech/success", // Success URL
-      furl: "https://aerocog.tech/failure", // Failure URL
-      curl: "https://aerocog.tech/failure", // Cancel URL
+      surl: "https://aerocog.netlify.app/success", // Success URL
+      furl: "https://aerocog.netlify.app/failure", // Failure URL
+      curl: "https://aerocog.netlify.app/failure", // Cancel URL
     };
 
     // Construct the string for hash generation

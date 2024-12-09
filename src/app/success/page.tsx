@@ -23,10 +23,39 @@ const SuccessPage = () => {
 
     if (!storedAppointmentDetails) {
       // Alert the user if no appointment details are found in local storage
-      setAlert({ type: 'danger', message: `Either you've not done the payment or there is a technical error in the backend, If you have done the payemnt. Please contact support@aerocog.tech` });
-
+      setAlert({ type: 'danger', message: `Either you've not done the payment or there is a technical error in the backend, If you have done the payment, please contact support@aerocog.tech` });
     } else {
       setAppointmentDetails(storedAppointmentDetails);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    console.log("Params received on success page:", Object.fromEntries(params.entries()));
+    const paymentStatus = params.get("status"); // This will come from PayU
+    const transactionId = params.get("txnid"); // PayU's transaction ID
+
+    // Retrieve the appointment data from the query params (sent from the Checkout page)
+    const expertId = params.get("expertId");
+    const expertName = params.get("expertName");
+    const userName = params.get("userName");
+    const userEmail = params.get("userEmail");
+    const whatsappNumber = params.get("whatsappNumber");
+    const dateString = params.get("date");
+    const time = params.get("time");
+
+    // Validate the headers
+    const allowedOrigins = [
+      "https://aerocog.tech",
+      "https://test.payu.in/_payment",
+      "https://aerocog.netlify.app"   // Allow PayU's origin
+    ];
+    const origin = window.location.origin;
+    const forwardedHost = window.location.host;
+
+    if (!allowedOrigins.includes(origin) && forwardedHost !== "aerocog.tech") {
+      console.error("Invalid origin or forwarded host", { origin, forwardedHost });
+      alert("Unauthorized access. Please contact support@aerocog.tech");
+      router.push("/experts");
+      return;
     }
 
     // Get current authenticated user

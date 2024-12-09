@@ -144,7 +144,11 @@ const CheckoutPage = () => {
         // Redirect to PayU with the generated payload
         const payuForm = document.createElement("form");
         payuForm.method = "POST";
+
+
+
         payuForm.action = "https://secure.payu.in/_payment";
+  
 
         // Add payload fields to the form
         for (const key in payload) {
