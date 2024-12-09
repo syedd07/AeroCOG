@@ -1,6 +1,6 @@
 const expertsData = [
   {
-    id: '1002',
+    id: 'A112401',
     name: 'Kannan Brahmaputran',
     designation: 'Aerospace Engineering',
     shortIntro: 'Gas Turbine, Aircraft Engines-Military and civil, Combustion, Thermodynamics, CFD',
@@ -15,12 +15,13 @@ const expertsData = [
     email: 'kanfb99@yahoo.com',
     socialLinks: [
       { platform: 'LinkedIn', link: 'https://www.linkedin.com/in/kannan-brahmaputran-90091645/' }
-    ]
+    ],
+    amount: 499
   },
   
   
   {
-    id: '5',
+    id: 'test',
     name: 'Yousuf Ali',
     designation: 'Web Dev', 
     shortIntro: 'Focused in setallite engineering',
@@ -33,7 +34,8 @@ const expertsData = [
     ],
     socialLinks: [
       { platform: 'LinkedIn', link: 'https://www.linkedin.com/in/janesmith' }
-    ]
+    ],
+    amount: 1
   },
  
   // More experts data...

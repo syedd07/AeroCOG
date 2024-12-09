@@ -23,7 +23,7 @@ const ExpertDetailPage = ({ params }) => {
 
   const handleConsult = () => {
     // Redirect to the consult page with the expertId
-    router.push(`/consult?expertId=${expert.id}&expertName=${expert.name}`);
+    router.push(`/consult?expertId=${expert.id}&expertName=${expert.name}&expertAmount=${expert.amount}`); // Redirect to the consult page with the expertId
   };
 
   return (
@@ -87,6 +87,12 @@ const ExpertDetailPage = ({ params }) => {
               <div className="mt-8 text-justify max-w-4xl mx-auto text-base">
                 <p>{expert.bio}</p>
               </div>
+              <br />
+              <div className="mt-8 text-right max-w-2x1 mx-auto text-xl underline decoration-indigo-500 underline-offset-2">
+                <h1>
+                  Consultation Fee: ₹{expert.amount}
+                </h1>
+              </div>
 
               {/* Consult Button */}
               <div className="mt-8">
@@ -94,7 +100,7 @@ const ExpertDetailPage = ({ params }) => {
                   onClick={handleConsult}
                   className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition duration-300"
                 >
-                  Consult with Dr. {expert.name}
+                  Consult with Dr. {expert.name} 
                 </button>
               </div>
             </div>

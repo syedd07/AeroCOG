@@ -9,13 +9,16 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from 'next/navigation';
 import Breadcrumb from '@/components/Common/Breadcrumb';
 import SEO from '@/components/Common/SEO';
-
+import Alert from '@/components/Common/CustomAlert';
+import { toast } from 'react-hot-toast';
 
 const auth = getAuth();
 const user = auth.currentUser;
 
 const ExpertSignUpForm = () => {
   const [isLoading, setIsLoading] = useState(false); // New state for loading
+  const [isUploaded, setIsUploaded] = useState(false);
+  const [alert, setAlert] = useState(null); // State for managing alerts
   const [step, setStep] = useState(1);
   const [user, setUser] = useState(null); // Track authenticated user
   const [formData, setFormData] = useState({
@@ -61,12 +64,22 @@ const ExpertSignUpForm = () => {
     }));
   };
 
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
     // Check if file size is within the limit (500KB)
-    if (file && file.size <= 500000) {
+    if (file && file.size <= 2000000) {
       setIsLoading(true);
+
+      try {
+        // Simulate upload process (replace with actual upload logic)
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        console.log('Photo uploaded successfully:', file);
+      } catch (error) {
+        console.error('Photo upload failed:', error);
+      } finally {
+        setIsLoading(false); // Hide loading message
+      }
 
 
       // Create a reference to store the file in Firebase Storage
@@ -92,7 +105,7 @@ const ExpertSignUpForm = () => {
         alert("Error uploading file: " + error.message);
       });
     } else {
-      alert("File size exceeds 500KB");
+      setAlert({ type: 'danger', message: "File size exceeds the limit. Please upload a file less than 2MB." })
     }
   };
 
@@ -118,7 +131,7 @@ const ExpertSignUpForm = () => {
     if (isFieldValid(step)) {
       setStep(step + 1);
     } else {
-      alert("Please fill in the required field correctly.");
+      setAlert({ type: 'danger', message: "Please fill in the required field correctly." })
     }
   };
 
@@ -132,7 +145,7 @@ const ExpertSignUpForm = () => {
   const handleSubmit = async (event) => {
     event.preventDefault(); // Prevent form default submit behavior
     if (!user) {
-      alert("You must be logged in to create an expert profile!");
+      setAlert({ type: 'danger', message: "You must be logged in to create an expert profile!" })
       return;
     }
     //console.log("Form Data before submission:", formData); // Debugging log
@@ -150,19 +163,19 @@ const ExpertSignUpForm = () => {
 
       // If email or mobile already exists, show an alert and return
       if (!emailQuerySnapshot.empty) {
-        alert("An expert with this email already exists. Please use a different email.");
+        setAlert({ type: 'danger', message: "An expert with this email already exists. Please use a different email." });
         return;
       }
 
       if (!mobileQuerySnapshot.empty) {
-        alert("An expert with this mobile number already exists. Please use a different number.");
+        setAlert({ type: 'danger', message: "An expert with this mobile number already exists. Please use a different number." });
         return;
       }
 
 
       // Validate password or other required fields here
       if (!formData.password || formData.password.length < 6) {
-        alert("Password must be at least 6 characters!");
+        setAlert({ type: 'danger', message: "Password must be at least 6 characters!" })
         return;
       }
 
@@ -175,11 +188,12 @@ const ExpertSignUpForm = () => {
       });
 
       console.log("Document written with ID: ", docRef.id);
-      alert("Expert profile created successfully!");
+      setAlert({ type: 'success', message: "Expert profile created successfully!" })
     } catch (error) {
       console.error("Error adding document: ", error);
-      alert("Failed to create profile. Contact support.");
+      setAlert({ type: 'danger', message: "Failed to create profile. Contact support." })
     }
+    toast.success('Expert Application Submitted successfully!'); // Display a success message
     router.push('/');
   };
 
@@ -212,6 +226,15 @@ const ExpertSignUpForm = () => {
 
         <form onSubmit={handleSubmit} className={styles.signUpForm}>
           <p style={{ textAlign: 'center', color: 'red', fontWeight: 'bold' }} className="text-dark dark:text-white text-lg mb-6">Please login, before onboarding as an expert. <i><a className='text-primary hover:underline' href='/signup'>here</a></i></p>
+          <div>
+            {/* Render the alert if it exists */}
+            {alert &&
+              <Alert type={alert.type}
+                message={alert.message}
+                onClose={() => setAlert(null)} // Close the alert
+              />}
+          </div>
+
           {/* Step-by-step input rendering */}
           {step >= 1 && (
             <div className={styles.step}>
@@ -280,23 +303,42 @@ const ExpertSignUpForm = () => {
                 className="border-stroke dark:text-body-color-dark dark:shadow-two w-full rounded-sm border bg-[#f8f8f8] px-6 py-3 text-base text-body-color outline-none transition-all duration-300 focus:border-primary dark:border-transparent dark:bg-[#2C303B] dark:focus:border-primary dark:focus:shadow-none"
                 required
                 minLength={120}
+                spellCheck="true"
               />
             </div>
           )}
+          {/* Photo upload */}
           {step >= 6 && (
-            <div className={styles.step}>
-              <label className="mb-3 block text-sm text-dark dark:text-white">Photo:</label>
-              <input
+
+            <div className="flex items-center justify-center w-full">
+              {!formData.photo ? (
+              <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                  <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                </svg>
+                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                </div>
+                <input 
+                id="dropzone-file"
                 type="file"
-                name="photo"
+                name='photo'
                 onChange={handlePhotoChange}
                 accept="image/*"
-                className={styles.input}
+                className="hidden"
                 required
-              />
-              {isLoading && <div className="loading-spinner"> Please wait Uploading...</div>} {/* Show loading */}
+                />
+                {isLoading && <div className="loading-spinner"> Please wait Uploading...</div>}
+              </label>
+              ) : (
+              <div className="text-center">
+                <p className="text-sm text-green-500 dark:text-green-400">Photo uploaded successfully!</p>
+              </div>
+              )}
             </div>
-          )}
+            )}
+          
           {step >= 7 && (
             <div className={styles.step}>
               <label className="mb-3 block text-sm text-dark dark:text-white">Notable Projects:</label>

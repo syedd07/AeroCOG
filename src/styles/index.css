@@ -31,38 +31,6 @@
     @apply opacity-100;
   }
 }
-
-/*Form styles 
-
-.consult-form-wrapper {
-  
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 150px;
-  margin-bottom: 150px;
-}
-
-
-
-
-
-
-.btn {
-  background-color: #007bff;
-  color: white;
-  padding: 12px;
-  margin-top: 20px;
-  width: 100%;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background-color: #0056b3;
-}
-*/
 .consult-form-container {
   max-width: 800px;
   width: 100%;
@@ -295,30 +263,6 @@ input {
 
 
 /* Alert Style */
-
-/* Define fade-in and fade-out animations */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-20px); /* Starts slightly above */
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0); /* Ends at normal position */
-  }
-}
-
-@keyframes fadeOut {
-  0% {
-    opacity: 1;
-    transform: translateY(0); /* Starts at normal position */
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-20px); /* Ends slightly above */
-  }
-}
-
 .custom-alert {
   position: fixed;
   top: 0;
@@ -410,3 +354,5 @@ input {
   animation: fadeOutDown 0.5s ease-in-out;
   pointer-events: none;
 }
+
+

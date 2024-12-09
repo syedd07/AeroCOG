@@ -8,6 +8,7 @@ import menuData from "./menuData";
 import { auth } from "../../components/firebase.js";  // Import Firebase auth
 import { signOut } from "firebase/auth";  // Import signOut from Firebase
 import { useAuthState } from 'react-firebase-hooks/auth';  // Hook to get current user
+import { toast } from "react-hot-toast";  // For displaying toast messages
 
 const Header = () => {
   // Navbar toggle
@@ -48,6 +49,7 @@ const Header = () => {
   // Handle Sign Out
   const handleSignOut = async () => {
     await signOut(auth);
+    toast.success('Logged out!'); // Displays a success message
     router.push("/");  // Redirect to Home page after sign out
   };
 
@@ -168,6 +170,7 @@ const Header = () => {
                   >
                     Sign Out
                   </button>
+                  
                   <Link
                     href="/profile"  // Profile link for logged-in users
                     className="hidden px-7 py-3 text-base font-medium text-dark hover:opacity-70 dark:text-white md:block"

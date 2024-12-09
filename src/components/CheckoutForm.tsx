@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { format } from 'date-fns'; // For date formatting
 import expertsData from '../../src/data/expertsData';
+import Alert from '../../src/components/Common/CustomAlert';
 
 const CheckoutPage = () => {
   const router = useRouter();
@@ -13,7 +14,7 @@ const CheckoutPage = () => {
   const selectedTimeSlot = searchParams.get('time');
   const [expert, setExpert] = useState(null);
   const [loading, setLoading] = useState(true)
-
+  const [alert, setAlert] = useState(null);
 
 
  // Fetch expert data based on expertId
@@ -24,6 +25,7 @@ const CheckoutPage = () => {
       setExpert(fetchedExpert);
     } else {
       console.error('Expert not found');
+      router.push('/experts');
     }
     setLoading(false);
   }
@@ -32,10 +34,10 @@ const CheckoutPage = () => {
   const handleProceedToConfirmation = () => {
     if (expert && selectedDate && selectedTimeSlot) {
       // Simulate confirmation or finalization of the consultation
-      alert('Consultation booked successfully!');
+      setAlert ({type: 'success', message: 'Consultation booked successfully!'})
       // Optionally, navigate to a confirmation page or reset the form
     } else {
-      alert('Please make sure all fields are filled.');
+      setAlert ({type:'danger', message:'Please make sure all fields are filled.'})
     }
   };
 
@@ -50,6 +52,15 @@ const CheckoutPage = () => {
   return (
     <div className="checkout-wrapper">
       <div className="checkout-container">
+        <div>
+        {alert && (
+          <Alert
+            message={alert.message}
+            type="danger"
+            onClose={() => setAlert(null)}
+          />
+        )}
+        </div>
         {expert ? (
           <>
             <h3>Consultation Summary</h3>

@@ -1,18 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { sendPasswordResetEmail, signOut, updateProfile, updateEmail, sendEmailVerification } from "firebase/auth";
+import {
+  sendPasswordResetEmail,
+  signOut,
+  updateProfile,
+  updateEmail,
+  sendEmailVerification,
+} from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db, auth } from "../../components/firebase";
-import styles from './profile.module.css';
-import { format } from 'date-fns';
-import Breadcrumb from '../../components/Common/Breadcrumb';
-import SEO from '@/components/Common/SEO';
+import styles from "./profile.module.css";
+import { format } from "date-fns";
+import Breadcrumb from "../../components/Common/Breadcrumb";
+import SEO from "@/components/Common/SEO";
+import Alert from "@/components/Common/CustomAlert"; // Import the Alert component
+import { toast } from "react-hot-toast";
 
 const Profile = () => {
   const pageName = "Profile";
   const description = "";
   const router = useRouter();
+  const [alert, setAlert] = useState(null); // State for managing alerts
 
   // State for user data and UI handling
   const [user, setUser] = useState<any>(null);
@@ -32,7 +41,7 @@ const Profile = () => {
       if (!user) return;
       const q = query(
         collection(db, "appointments"),
-        where("userEmail", "==", user.email)
+        where("userEmail", "==", user.email),
       );
 
       try {
@@ -53,7 +62,11 @@ const Profile = () => {
     if (user?.email) {
       try {
         await sendPasswordResetEmail(auth, user.email);
-        alert("Password reset email sent successfully.");
+        setAlert({
+          type: "success",
+          message: "Password reset email sent successfully.",
+        });
+        toast.success("Password reset email sent successfully.");
       } catch (error) {
         console.error("Error sending password reset email: ", error);
         setError("Failed to send reset email. Please try again.");
@@ -74,10 +87,10 @@ const Profile = () => {
         setLoading(false);
         setNewName(user.displayName || "");
         setNewEmail(user.email || "");
-
       } else {
-        setError("No user found.");
+        setError("No user found. Please Sign-in.");
         setLoading(false);
+        toast.error("No user found. Please Sign-in.");
         router.push("/signin");
       }
     });
@@ -85,20 +98,46 @@ const Profile = () => {
     return () => unsubscribe();
   }, []);
 
-  if (loading) return
-  <div role="status"
-    style={{ textAlign: 'center', marginTop: '200px', marginBottom: '200px' }}
+  if (loading) return;
+  <div
+    className="text-center"
+    role="status"
+    style={{ textAlign: "center", marginTop: "200px", marginBottom: "200px" }}
   >
-    <svg aria-hidden="true" className="inline w-4 h-4 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-      <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+    <svg
+      aria-hidden="true"
+      className="inline h-8 w-8 animate-spin fill-blue-600 text-gray-200 dark:text-gray-600"
+      viewBox="0 0 100 101"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+        fill="currentColor"
+      />
+      <path
+        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+        fill="currentFill"
+      />
     </svg>
-    <p >Loading...</p>;
-  </div>
-  if (error) return <p style={{ textAlign: "center", marginTop: "200px", marginBottom: '200px' }}>{error}</p>;
+    <span className="sr-only">Loading...</span>
+  </div>;
+  if (error)
+    return (
+      <p
+        style={{
+          textAlign: "center",
+          marginTop: "200px",
+          marginBottom: "200px",
+        }}
+      >
+        {error}
+      </p>
+    );
 
   const handleSignOut = () => {
     signOut(auth);
+    toast.success("Signed out successfully.");
     router.push("/");
   };
 
@@ -106,6 +145,7 @@ const Profile = () => {
   const handleUpdateProfile = async () => {
     if (newEmail.trim() === "") {
       setError("Please enter a valid email.");
+      toast.error("Please enter a valid email.");
       return;
     }
 
@@ -123,16 +163,22 @@ const Profile = () => {
         if (validEmail !== user.email) {
           await updateEmail(user, validEmail); // Update email
           await sendEmailVerification(user); // Send verification email for new email
-          alert("Please verify your new email address.");
+          setAlert({
+            type: "info",
+            message: "Please verify your new email address.",
+          });
         }
 
         setError(null); // Clear any previous errors
-        alert("Profile updated successfully. Please verify your email address.");
+        setAlert({
+          type: "success",
+          message:
+            "Profile updated successfully. Please verify your email address.",
+        });
       }
     } catch (error) {
       console.error("Error updating profile:", error);
       setError("Failed to update profile. Please : support@aerocog.tech");
-
     } finally {
       setLoadingUpdate(false);
     }
@@ -153,8 +199,12 @@ const Profile = () => {
       return appointmentDate >= currentDate;
     })
     .sort((a, b) => {
-      const dateA = a.date.seconds ? new Date(a.date.seconds * 1000) : new Date(a.date);
-      const dateB = b.date.seconds ? new Date(b.date.seconds * 1000) : new Date(b.date);
+      const dateA = a.date.seconds
+        ? new Date(a.date.seconds * 1000)
+        : new Date(a.date);
+      const dateB = b.date.seconds
+        ? new Date(b.date.seconds * 1000)
+        : new Date(b.date);
       return dateA.getTime() - dateB.getTime();
     });
 
@@ -171,27 +221,39 @@ const Profile = () => {
       <div className={styles.profileContainer}>
         <Breadcrumb pageName={pageName} description={description} />
 
-
         {/* Tab  */}
         <div className={styles.tabs}>
           <button
             onClick={() => handleTabClick("profile")}
-            className={activeTab === "profile" ? styles.activeTab : styles.inactiveTab}
-
+            className={
+              activeTab === "profile" ? styles.activeTab : styles.inactiveTab
+            }
           >
             My Profile
           </button>
           <button
             onClick={() => handleTabClick("appointments")}
-            className={activeTab === "appointments" ? styles.activeTab : styles.inactiveTab}
-
+            className={
+              activeTab === "appointments"
+                ? styles.activeTab
+                : styles.inactiveTab
+            }
           >
             My Appointments
           </button>
         </div>
 
-        {/* "My Profile" Tab */}
+        {/* Render the alert if it exists */}
 
+        {alert && (
+          <Alert
+            type={alert.type}
+            message={alert.message}
+            onClose={() => setAlert(null)}
+          />
+        )}
+
+        {/* "My Profile" Tab */}
         {activeTab === "profile" && (
           <div className={styles.profileContent}>
             <h2>Profile Information</h2>
@@ -199,9 +261,13 @@ const Profile = () => {
             <div>
               {!isEditing ? (
                 <>
-                  <p><strong>Name:</strong> {user.displayName}</p>
+                  <p>
+                    <strong>Name:</strong> {user.displayName}
+                  </p>
                   <br />
-                  <p><strong>Email:</strong> {user.email}</p>
+                  <p>
+                    <strong>Email:</strong> {user.email}
+                  </p>
                   <br />
                   <button
                     onClick={() => setIsEditing(true)}
@@ -245,13 +311,18 @@ const Profile = () => {
               )}
             </div>
 
-            <button onClick={handlePasswordReset} className={styles.resetButton}>
+            <button
+              onClick={handlePasswordReset}
+              className={styles.resetButton}
+            >
               Reset Password
             </button>
             <div className={styles.info} id="login">
               <br />
-              <span className={styles.infoLabel}>Last Login:</span>
-              {user?.metadata?.lastSignInTime ? new Date(user.metadata.lastSignInTime).toLocaleString() : "N/A"}
+              <span className={styles.infoLabel}>Last Login: </span>
+              {user?.metadata?.lastSignInTime
+                ? new Date(user.metadata.lastSignInTime).toLocaleString()
+                : "N/A"}
             </div>
             <button onClick={handleSignOut} className={styles.signOutButton}>
               Sign Out
@@ -272,21 +343,34 @@ const Profile = () => {
                 <div className={styles.bookingGrid}>
                   {upcomingAppointments.map((appointment, index) => (
                     <li key={index} className={styles.bookingItem}>
-                      <span className={styles.bookingDetail}>Expert: {appointment.expertName || "N/A"}</span>
-                      <span className={styles.bookingDetail}>Time: {appointment.time || "N/A"}</span>
                       <span className={styles.bookingDetail}>
-                        Date: {appointment.date
-                          ? typeof appointment.date === 'object' && appointment.date.seconds
-                            ? format(new Date(appointment.date.seconds * 1000), 'dd/MM/yyyy')
-                            : format(new Date(appointment.date), 'dd/MM/yyyy')
+                        Expert: {appointment.expertName || "N/A"}
+                      </span>
+                      <span className={styles.bookingDetail}>
+                        Time: {appointment.time || "N/A"}
+                      </span>
+                      <span className={styles.bookingDetail}>
+                        Date:{" "}
+                        {appointment.date
+                          ? typeof appointment.date === "object" &&
+                            appointment.date.seconds
+                            ? format(
+                                new Date(appointment.date.seconds * 1000),
+                                "dd/MM/yyyy",
+                              )
+                            : format(new Date(appointment.date), "dd/MM/yyyy")
                           : "Not Available"}
                       </span>
-                      <span className={styles.statusBooked}>Status: Booked</span>
+                      <span className={styles.statusBooked}>
+                        Status: Booked
+                      </span>
                     </li>
                   ))}
                 </div>
               ) : (
-                <p className={styles.noAppointments}>No upcoming appointments</p>
+                <p className={styles.noAppointments}>
+                  No upcoming appointments
+                </p>
               )}
             </div>
           </div>
@@ -294,7 +378,6 @@ const Profile = () => {
       </div>
     </>
   );
-
 };
 
 export default Profile;
