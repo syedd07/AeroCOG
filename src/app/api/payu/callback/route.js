@@ -16,12 +16,21 @@ export const POST = async (req) => {
     const key = process.env.PAYU_KEY;
 
     // Construct the string for hash generation
-    const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
-    
+    let hashString;
+    if (data.hasOwnProperty("additionalCharges")) {
+      const additionalCharges = data.additionalCharges;
+      hashString = `${additionalCharges}|${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    } else {
+      hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    }
+
     console.log("Hash String for Validation:", hashString);
 
     // Generate the calculated hash
-    const calculatedHash = crypto.createHash('sha512').update(hashString).digest("hex");
+    const calculatedHash = crypto
+      .createHash("sha512")
+      .update(hashString)
+      .digest("hex");
 
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
@@ -34,12 +43,14 @@ export const POST = async (req) => {
       email,
       status,
     });
-    
 
     // Compare the calculated hash with the received hash
     if (calculatedHash !== hash) {
       console.log("Hash validation failed");
-      return NextResponse.json({ error: "Hash validation failed" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Hash validation failed" },
+        { status: 400 },
+      );
     }
 
     // Perform actions based on the status
@@ -47,17 +58,20 @@ export const POST = async (req) => {
       console.log("Payment success:", txnid);
       // Redirect to the success page with query parameters
       return NextResponse.redirect(
-        `https://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`
+        `https://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`,
       );
     } else {
       console.log("Payment failed:", txnid);
       // Redirect to the failure page
       return NextResponse.redirect(
-        `https://aerocog.tech/failure?txnid=${txnid}&status=failed`
+        `https://aerocog.tech/failure?txnid=${txnid}&status=failed`,
       );
     }
   } catch (error) {
     console.error("Error in PayU callback:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 },
+    );
   }
 };
