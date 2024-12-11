@@ -16,7 +16,8 @@ export const POST = async (req) => {
     const key = process.env.PAYU_KEY;
 
     // Construct the string for hash generation
-    const hashString = `${key}|${status}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+    const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    
     console.log("Hash String for Validation:", hashString);
 
     // Generate the calculated hash
@@ -25,6 +26,15 @@ export const POST = async (req) => {
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
     console.log("Received Hash:", hash);
+    console.log("Expected vs Received Data:", {
+      txnid,
+      amount,
+      productinfo,
+      firstname,
+      email,
+      status,
+    });
+    
 
     // Compare the calculated hash with the received hash
     if (calculatedHash !== hash) {
