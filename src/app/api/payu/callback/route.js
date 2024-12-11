@@ -21,7 +21,7 @@ export const POST = async (req) => {
     console.log("Hash String for Validation:", hashString);
 
     // Generate the calculated hash
-    const calculatedHash = crypto.createHash("sha512").update(hashString).digest("hex");
+    const calculatedHash = crypto.createHash('sha512').update(hashString).digest("hex");
 
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
