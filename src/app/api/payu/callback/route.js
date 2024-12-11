@@ -6,31 +6,33 @@ export const POST = async (req) => {
     const body = await req.formData();
     const data = Object.fromEntries(body);
 
+    // Log the received data to debug the fields
+    console.log("Received Data:", data);
+
     const { txnid, amount, status, productinfo, firstname, email, hash } = data;
 
-    // Validate the hash
+    // Define the PayU Merchant Credentials (ensure these are correct)
     const salt = process.env.PAYU_SALT;
     const key = process.env.PAYU_KEY;
 
-    // Correctly build the hash string
+    // Construct the string for hash generation
     const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
-    const calculatedHash = crypto
-      .createHash("sha512")
-      .update(hashString)
-      .digest("hex");
+    console.log("Hash String for Validation:", hashString);
 
+    // Generate the calculated hash
+    const calculatedHash = crypto.createHash("sha512").update(hashString).digest("hex");
+
+    // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
-    console.log("Received Hash:", data.hash);
+    console.log("Received Hash:", hash);
 
-    // Validate the hash
+    // Compare the calculated hash with the received hash
     if (calculatedHash !== hash) {
-      return NextResponse.json(
-        { error: "Hash validation failed" },
-        { status: 400 }
-      );
+      console.log("Hash validation failed");
+      return NextResponse.json({ error: "Hash validation failed" }, { status: 400 });
     }
 
-    // Perform actions based on status
+    // Perform actions based on the status
     if (status === "success") {
       console.log("Payment success:", txnid);
       // Redirect to the success page with query parameters
@@ -46,9 +48,6 @@ export const POST = async (req) => {
     }
   } catch (error) {
     console.error("Error in PayU callback:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 };
