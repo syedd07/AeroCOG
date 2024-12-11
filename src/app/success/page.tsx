@@ -6,6 +6,7 @@ import { db } from "../../components/firebase";
 import { getAuth } from "firebase/auth";
 import Alert from "@/components/Common/CustomAlert";  // Import the Alert component
 import expertsData from "@/data/expertsData";
+import { toast } from "react-hot-toast";
 
 const SuccessPage = () => {
   const router = useRouter();
