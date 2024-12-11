@@ -10,7 +10,6 @@ export const POST = async (req) => {
       txnid,
       amount,
       status,
-      key,
       productinfo,
       firstname,
       email,
@@ -19,7 +18,9 @@ export const POST = async (req) => {
 
     // Validate the hash
     const salt = process.env.PAYU_SALT;
-    const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    const key = process.env.PAYU_KEY;
+
+    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
     const calculatedHash = crypto.createHash("sha512").update(hashString).digest("hex");
 
     if (calculatedHash !== hash) {
@@ -37,7 +38,7 @@ export const POST = async (req) => {
       console.log("Payment failed:", txnid);
       // Redirect to the failure page
       return NextResponse.redirect(
-        `https://aerocog.tech/success?txnid=${txnid}&status=failed`
+        `https://aerocog.tech/failure?txnid=${txnid}&status=failed`
       );
     }
   } catch (error) {
