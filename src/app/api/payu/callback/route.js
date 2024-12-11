@@ -16,7 +16,7 @@ export const POST = async (req) => {
     const key = process.env.PAYU_KEY;
 
     // Construct the string for hash generation
-    const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
+    const hashString = `${key}|${status}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
     console.log("Hash String for Validation:", hashString);
 
     // Generate the calculated hash
