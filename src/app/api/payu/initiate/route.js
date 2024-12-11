@@ -34,7 +34,7 @@ export const POST = async (req) => {
       email,             // Customer's Email
       phone,             // Customer's Phone (optional)
       service_provider: "payu_paisa", // Service Provider
-      surl: "https://aerocog.tech/success", // Success URL
+      surl: "https://aerocog.tech/api/payu/callback", // Success URL
       furl: "https://aerocog.tech/failure", // Failure URL
       curl: "https://aerocog.tech/failure", // Cancel URL
     };

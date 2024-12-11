@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 
 export const POST = async (req) => {
   try {
-    // Parse the incoming form data (PayU sends data as form-urlencoded)
     const body = await req.formData();
     const data = Object.fromEntries(body);
 
@@ -18,7 +17,7 @@ export const POST = async (req) => {
       hash,
     } = data;
 
-    // Validate the hash using your PayU salt
+    // Validate the hash
     const salt = process.env.PAYU_SALT;
     const hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
     const calculatedHash = crypto.createHash("sha512").update(hashString).digest("hex");
@@ -27,16 +26,20 @@ export const POST = async (req) => {
       return NextResponse.json({ error: "Hash validation failed" }, { status: 400 });
     }
 
-    // Perform actions based on the status
+    // Perform actions based on status
     if (status === "success") {
       console.log("Payment success:", txnid);
-      // Update your database with successful payment
+      // Redirect to the success page with query parameters
+      return NextResponse.redirect(
+        `https://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`
+      );
     } else {
       console.log("Payment failed:", txnid);
-      // Handle failure logic here
+      // Redirect to the failure page
+      return NextResponse.redirect(
+        `https://aerocog.tech/success?txnid=${txnid}&status=failed`
+      );
     }
-
-    return NextResponse.json({ message: "Callback processed successfully" }, { status: 200 });
   } catch (error) {
     console.error("Error in PayU callback:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
