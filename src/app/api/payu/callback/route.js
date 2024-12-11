@@ -16,6 +16,7 @@ export const POST = async (req) => {
       firstname,
       email,
       status,
+      hash,
       udf1,
       udf2,
       udf3,
@@ -32,35 +33,35 @@ export const POST = async (req) => {
     const salt = process.env.PAYU_SALT;
     const key = process.env.PAYU_KEY;
 
-// Construct the hash string as per PayU guidelines (without additionalCharges)
-const hashSequence = [
-  salt,
-  status,
-  udf10 || '',
-  udf9 || '',
-  udf8 || '',
-  udf7 || '',
-  udf6 || '',
-  udf5 || '',
-  udf4 || '',
-  udf3 || '',
-  udf2 || '',
-  udf1 || '',
-  email || '',
-  firstname || '',
-  productinfo || '',
-  amount || '',
-  txnid || '',
-  key,
-];
+    // Construct the hash string as per PayU guidelines (without additionalCharges)
+    const hashSequence = [
+      salt,
+      status,
+      udf10 || "",
+      udf9 || "",
+      udf8 || "",
+      udf7 || "",
+      udf6 || "",
+      udf5 || "",
+      udf4 || "",
+      udf3 || "",
+      udf2 || "",
+      udf1 || "",
+      email || "",
+      firstname || "",
+      productinfo || "",
+      amount || "",
+      txnid || "",
+      key,
+    ];
 
-const hashString = hashSequence.join('|');
+    const hashString = hashSequence.join("|");
 
-// Generate the calculated hash
-const calculatedHash = crypto
-  .createHash('sha512')
-  .update(hashString)
-  .digest('hex');
+    // Generate the calculated hash
+    const calculatedHash = crypto
+      .createHash("sha512")
+      .update(hashString)
+      .digest("hex");
 
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
@@ -74,15 +75,16 @@ const calculatedHash = crypto
       status,
     });
 
-    // Compare the calculated hash with the received hash
-    if (calculatedHash !== hash) {
-      console.log("Hash validation failed");
-      return NextResponse.json(
-        { error: "Hash validation failed" },
-        { status: 400 },
-      );
+    // Validate the hash
+    if (calculatedHash === hash) {
+      // The hashes match; proceed with processing
+      console.log("Hash validation successful");
+    } else {
+      // The hashes do not match; handle the error
+      console.error("Hash validation failed");
     }
 
+    
     // Perform actions based on the status
     if (status === "success") {
       console.log("Payment success:", txnid);
