@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
 import { getAuth } from "firebase/auth";
@@ -10,8 +10,7 @@ import { toast } from "react-hot-toast";
 
 const SuccessPage = () => {
   const router = useRouter();
-  const searchParams = useSearchParams(); // Get URL search params
-
+  
   const [step, setStep] = useState(0);    // 0 = Summary, 1 = Payment Verification, 2 = Create Doc, 3 = Completed
   const [loading, setLoading] = useState(false);   // Indicates document creation
   const [appointmentDetails, setAppointmentDetails] = useState(null); // Appointment details
@@ -19,13 +18,24 @@ const SuccessPage = () => {
   const [alert, setAlert] = useState(null); // State for managing alerts
 
 
-    // Extract query parameters
-    const txnid = searchParams.get("txnid");
-    const status = searchParams.get("status");
-    const amount = searchParams.get("amount");
+  // State variables for query parameters
+  const [txnid, setTxnid] = useState("");
+  const [status, setStatus] = useState("");
+  const [amount, setAmount] = useState("");
 
 
   useEffect(() => {
+    // Parse query parameters from the URL
+    const params = new URLSearchParams(window.location.search);
+    const txnidParam = params.get("txnid");
+    const statusParam = params.get("status");
+    const amountParam = params.get("amount");
+
+    setTxnid(txnidParam || "");
+    setStatus(statusParam || "");
+    setAmount(amountParam || "");
+
+
     // Fetch appointment details from local storage
     const storedAppointmentDetails = JSON.parse(
       localStorage.getItem("appointmentDetails")
@@ -42,8 +52,8 @@ const SuccessPage = () => {
       
     }
     
-    setAppointmentDetails(storedAppointmentDetails);
-
+  
+    
     // Get current authenticated user
     const auth = getAuth();
     const currentUser = auth.currentUser;
@@ -78,6 +88,7 @@ const SuccessPage = () => {
   const handleCreateDoc = async () => {
     if (!appointmentDetails || !user) {
       console.error("Missing required data:", { appointmentDetails, user });
+      toast.error("Error creating appointment. Contact support@aerocog.tech");
       setAlert({ type: 'danger', message: "Error creating appointment. Contact support@aerocog.tech" });
       return;
     }
