@@ -9,28 +9,58 @@ export const POST = async (req) => {
     // Log the received data to debug the fields
     console.log("Received Data:", data);
 
-    const { txnid, amount, status, productinfo, firstname, email, hash } = data;
+    const {
+      txnid,
+      amount,
+      productinfo,
+      firstname,
+      email,
+      status,
+      udf1,
+      udf2,
+      udf3,
+      udf4,
+      udf5,
+      udf6,
+      udf7,
+      udf8,
+      udf9,
+      udf10,
+    } = data;
 
     // Define the PayU Merchant Credentials (ensure these are correct)
     const salt = process.env.PAYU_SALT;
     const key = process.env.PAYU_KEY;
 
-    // Construct the string for hash generation
-    let hashString;
-    if (data.hasOwnProperty("additionalCharges")) {
-      const additionalCharges = data.additionalCharges;
-      hashString = `${additionalCharges}|${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
-    } else {
-      hashString = `${salt}|${status}|||||||||||${email}|${firstname}|${productinfo}|${amount}|${txnid}|${key}`;
-    }
+// Construct the hash string as per PayU guidelines (without additionalCharges)
+const hashSequence = [
+  salt,
+  status,
+  udf10 || '',
+  udf9 || '',
+  udf8 || '',
+  udf7 || '',
+  udf6 || '',
+  udf5 || '',
+  udf4 || '',
+  udf3 || '',
+  udf2 || '',
+  udf1 || '',
+  email || '',
+  firstname || '',
+  productinfo || '',
+  amount || '',
+  txnid || '',
+  key,
+];
 
-    console.log("Hash String for Validation:", hashString);
+const hashString = hashSequence.join('|');
 
-    // Generate the calculated hash
-    const calculatedHash = crypto
-      .createHash("sha512")
-      .update(hashString)
-      .digest("hex");
+// Generate the calculated hash
+const calculatedHash = crypto
+  .createHash('sha512')
+  .update(hashString)
+  .digest('hex');
 
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
