@@ -1,33 +1,47 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { collection, addDoc } from "firebase/firestore";
 import { db } from "../../components/firebase";
 import { getAuth } from "firebase/auth";
 import Alert from "@/components/Common/CustomAlert";  // Import the Alert component
-
 import expertsData from "@/data/expertsData";
 
 const SuccessPage = () => {
   const router = useRouter();
-  const [step, setStep] = useState(0); // 0 = Summary, 1 = Payment Verification, 2 = Create Doc, 3 = Completed
-  const [loading, setLoading] = useState(false); // Indicates document creation
-  const [appointmentDetails, setAppointmentDetails] = useState(null);
-  const [user, setUser] = useState(null); // Authenticated user
+  const searchParams = useSearchParams(); // Get URL search params
+
+  const [step, setStep] = useState(0);    // 0 = Summary, 1 = Payment Verification, 2 = Create Doc, 3 = Completed
+  const [loading, setLoading] = useState(false);   // Indicates document creation
+  const [appointmentDetails, setAppointmentDetails] = useState(null); // Appointment details
+  const [user, setUser] = useState(null);  // Authenticated user
   const [alert, setAlert] = useState(null); // State for managing alerts
+
+
+    // Extract query parameters
+    const txnid = searchParams.get("txnid");
+    const status = searchParams.get("status");
+    const amount = searchParams.get("amount");
+
 
   useEffect(() => {
     // Fetch appointment details from local storage
-    const storedAppointmentDetails = JSON.parse(localStorage.getItem("appointmentDetails"));
+    const storedAppointmentDetails = JSON.parse(
+      localStorage.getItem("appointmentDetails")
+    );
     setAppointmentDetails(storedAppointmentDetails);
 
     if (!storedAppointmentDetails) {
       // Alert the user if no appointment details are found in local storage
       setAlert({ type: 'danger', message: `Either you've not done the payment or there is a technical error in the backend, If you have done the payemnt. Please contact support@aerocog.tech` });
 
-    } else {
-      setAppointmentDetails(storedAppointmentDetails);
+    } else if (status === "success") {
+      // Payment was successful
+      toast.success("Payment successful! Proceeding to appointment booking.");
+      
     }
+    
+    setAppointmentDetails(storedAppointmentDetails);
 
     // Get current authenticated user
     const auth = getAuth();
@@ -84,6 +98,9 @@ const SuccessPage = () => {
       time: appointmentDetails.time,
       userEmail: user.userEmail,
       userName: user.userName,
+      TransactionId: txnid,
+      Amount: amount,
+      Status: status,
       // whatsappNumber: appointmentDetails.whatsappNumber,
     };
 
@@ -127,6 +144,15 @@ const SuccessPage = () => {
               <p><strong>Appointment Time:</strong> {appointmentDetails.time}</p>
               <br />
               <p><strong>Mobile Number:</strong> {appointmentDetails.whatsappNumber}</p>
+              <hr />
+              <h3> Transaction Details</h3>
+              <br />
+              <p><strong>Transaction Id:</strong> {txnid}</p>
+              <br />
+              <p><strong>Amount:</strong>₹ {amount}</p>
+              <br />
+              <p><strong>Status:</strong> {status}</p>
+
             </div>
           )}
           <button
