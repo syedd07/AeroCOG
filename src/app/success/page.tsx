@@ -156,9 +156,12 @@ const SuccessPage = () => {
               <p><strong>Appointment Time:</strong> {appointmentDetails.time}</p>
               <br />
               <p><strong>Mobile Number:</strong> {appointmentDetails.whatsappNumber}</p>
-              <hr />
-              <h3> Transaction Details</h3>
-              <br />
+              
+              <div className="inline-flex items-center justify-center w-full">
+                <hr className="w-64 h-px my-8 bg-gray-800 border-0 dark:bg-gray-300" />
+                <span className="absolute px-3 font-strong text-gray-900 -translate-x-1/2 bg-white left-1/2 dark:text-white dark:bg-gray-900 ">Transaction Details</span>
+              </div>
+              
               <p><strong>Transaction Id:</strong> {txnid}</p>
               <br />
               <p><strong>Amount:</strong>₹ {amount}</p>
@@ -166,6 +169,7 @@ const SuccessPage = () => {
               <p><strong>Status:</strong> {status}</p>
 
             </div>
+            
           )}
           <button
             onClick={handleVerifyAndProceed}
