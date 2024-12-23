@@ -4,17 +4,21 @@ import type { NextRequest } from "next/server";
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow PayU's origin for success and failure pages
+  // If you only need special handling for PayU POST callbacks,
+  // do that in your /api/payu/callback route, not here.
+  // Regular GET requests to /success or /failure pages should just pass through:
   if (pathname.startsWith("/success") || pathname.startsWith("/failure")) {
-    const response = NextResponse.next();
-    response.headers.set("x-forwarded-host", "secure.payu.in");
-    return response;
+    // Let normal requests proceed without modifying headers
+    return NextResponse.next();
   }
-  console.log("Middleware executed for:", request.nextUrl.href);
+  
   // Default response for other routes
   return NextResponse.next();
 }
 
+// If you don't need middleware for /success or /failure at all,
+// you can remove them from the matcher array below.
 export const config = {
-  matcher: ["/success", "/failure"], // Middleware applies only to these routes
+  // Remove "/success", "/failure" if not needed here
+  matcher: ["/success", "/failure"], 
 };
