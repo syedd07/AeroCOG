@@ -40,7 +40,7 @@ export const POST = async (req) => {
     };
 
     // Construct the string for hash generation
-    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}||||||||||${salt}`;
     
     // Generate the hash using SHA-512
     const hash = crypto.createHash('sha512').update(hashString).digest('hex');
