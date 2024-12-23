@@ -4,7 +4,8 @@
       "http://localhost:3000",
       "https://aerocog-8af654b8a9d1.herokuapp.com/",
       "https://aerocog.tech",
-      "https://secure.payu.in"
+      "https://secure.payu.in",
+      "https://aerocog.vercel.app/"
     ],
     "responseHeader": [
       "Content-Type",

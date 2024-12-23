@@ -1,10 +1,10 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
-export const POST = async (req) => {
+export async function POST(request) {
   try {
-    const body = await req.formData();
-    const data = Object.fromEntries(body);
+    const formData = await request.formData();
+    const data = Object.fromEntries(formData.entries());
 
     // Log the received data to debug the fields
     console.log("Received Data:", data);
@@ -32,7 +32,7 @@ export const POST = async (req) => {
     // Define the PayU Merchant Credentials (ensure these are correct)
     const salt = process.env.PAYU_SALT;
     const key = process.env.PAYU_KEY;
-
+    console.log("Received Data:", data);
     // Construct the hash string as per PayU guidelines (without additionalCharges)
     const hashSequence = [
       salt,
@@ -53,14 +53,14 @@ export const POST = async (req) => {
       amount || "",
       txnid || "",
       key,
-    ];
+    ].join("|");
 
-    const hashString = hashSequence.join("|");
+    // const hashString = hashSequence.join("|");
 
     // Generate the calculated hash
     const calculatedHash = crypto
       .createHash("sha512")
-      .update(hashString)
+      .update(hashSequence)
       .digest("hex");
 
     // Log the calculated and received hash values
@@ -77,26 +77,24 @@ export const POST = async (req) => {
 
     // Validate the hash
     if (calculatedHash === hash) {
-      // The hashes match; proceed with processing
-      console.log("Hash validation successful");
+      if (status === "success") {
+        console.log("Payment success:", txnid);
+        // Redirect to the success page with query parameters
+        return NextResponse.redirect(
+          `https://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`,
+        );
+      } else {
+        console.log("Payment failed:", txnid);
+        // Redirect to the failure page
+        return NextResponse.redirect(
+          `https://aerocog.tech/failure?txnid=${txnid}&status=failed`,
+        );
+      }
     } else {
-      // The hashes do not match; handle the error
       console.error("Hash validation failed");
-    }
-
-    
-    // Perform actions based on the status
-    if (status === "success") {
-      console.log("Payment success:", txnid);
-      // Redirect to the success page with query parameters
+      // You can choose to redirect to an error page or handle it accordingly
       return NextResponse.redirect(
-        `http://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`,
-      );
-    } else {
-      console.log("Payment failed:", txnid);
-      // Redirect to the failure page
-      return NextResponse.redirect(
-        `http://aerocog.tech/failure?txnid=${txnid}&status=failed`,
+        `https://aerocog.tech/error?txnid=${txnid}&status=hash_failed`,
       );
     }
   } catch (error) {
@@ -106,4 +104,4 @@ export const POST = async (req) => {
       { status: 500 },
     );
   }
-};
+}
