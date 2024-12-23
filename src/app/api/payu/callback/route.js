@@ -24,6 +24,7 @@ export async function POST(request) {
       udf8,
       udf9,
       udf10,
+      udf11
     } = data;
 
     // Define the PayU Merchant Credentials (ensure these are correct)
@@ -34,6 +35,7 @@ export async function POST(request) {
     const hashSequence = [
       salt,
       status,
+      udf11 || "",
       udf10 || "",
       udf9 || "",
       udf8 || "",
