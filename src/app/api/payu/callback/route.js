@@ -90,13 +90,13 @@ export const POST = async (req) => {
       console.log("Payment success:", txnid);
       // Redirect to the success page with query parameters
       return NextResponse.redirect(
-        `https://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`,
+        `http://aerocog.tech/success?txnid=${txnid}&status=${status}&amount=${amount}`,
       );
     } else {
       console.log("Payment failed:", txnid);
       // Redirect to the failure page
       return NextResponse.redirect(
-        `https://aerocog.tech/failure?txnid=${txnid}&status=failed`,
+        `http://aerocog.tech/failure?txnid=${txnid}&status=failed`,
       );
     }
   } catch (error) {

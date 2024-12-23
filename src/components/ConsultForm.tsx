@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 //import "react-calendar/dist/Calendar.css";
 import expertsData from "@/data/expertsData";
 import Alert from "./Common/CustomAlert";
-import 'flowbite';
+
 
 const ConsultForm = ({ selectedExpert }) => {
   const router = useRouter();
@@ -203,12 +203,6 @@ const ConsultForm = ({ selectedExpert }) => {
                 <div className="p-4 pt-0">
                   {/* Date Picker */}
 
-                  <div
-                    inline-datepicker
-                    datepicker-autoselect-today
-                    className="mx-auto sm:mx-0 flex justify-center my-5 [&>div>div]:shadow-none [&>div>div]:bg-gray-50 [&_div>button]:bg-gray-50"
-                  ></div>
-
                   <label className="text-sm font-medium text-gray-900 dark:text-white mb-2 mt-0 block">
                     Pick a date
                   </label>
@@ -239,14 +233,15 @@ const ConsultForm = ({ selectedExpert }) => {
                           value={time}
                           className="hidden peer"
                           name="timetable"
+                          placeholder="Pick a Date"
                           onChange={() => handleTimeChange(time)}
                           checked={selectedTime === time}
                         />
                         <label
                           htmlFor={time}
                           className={`inline-flex items-center justify-center w-full px-2 py-1 text-sm font-medium text-center hover:text-gray-900 dark:hover:text-white bg-white dark:bg-gray-800 border rounded-lg cursor-pointer text-gray-500 border-gray-200 dark:border-gray-700 dark:peer-checked:border-blue-500 peer-checked:border-blue-700 dark:hover:border-gray-600 dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900 ${selectedTime === time
-                              ? "dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
-                              : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
+                            ? "dark:peer-checked:text-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-700 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-600 dark:peer-checked:bg-blue-900"
+                            : "border-gray-200 bg-white text-gray-500 hover:bg-gray-50"
                             }`}
                         >
                           {time}

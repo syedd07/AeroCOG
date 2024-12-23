@@ -10,7 +10,7 @@ import dynamic from 'next/dynamic'; // Import dynamic for lazy loading
 import expertsData from '@/data/expertsData';
 import SEO from '@/components/Common/SEO';
 import toast from 'react-hot-toast';
-
+import { Modal } from 'flowbite'
 
 // Dynamically import ConsultForm so it's only loaded on the client side
 const ConsultForm = dynamic(() => import('@/components/ConsultForm'), {
@@ -67,7 +67,7 @@ const ConsultPage = () => {
         setUser(user);
       } else {
         toast.error('Please login to book a consultation.');
-        router.push('/signup'); // Redirect to login if not authenticated
+        router.push('/signin'); // Redirect to login if not authenticated
       }
       setLoading(false);
     });
