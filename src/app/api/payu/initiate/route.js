@@ -32,15 +32,25 @@ export const POST = async (req) => {
       productinfo,       // Product Description
       firstname,         // Customer's First Name
       email,             // Customer's Email
+      udf1: body.udf1 || "",
+      udf2: body.udf2 || "",
+      udf3: body.udf3 || "",
+      udf4: body.udf4 || "",
+      udf5: body.udf5 || "",
+      udf6: body.udf6 || "",
+      udf7: body.udf7 || "",
+      udf8: body.udf8 || "",
+      udf9: body.udf9 || "",
+      udf10: body.udf10 || "",
       phone,             // Customer's Phone (optional)
       service_provider: "payu_paisa", // Service Provider
       surl: "https://aerocog.tech/api/payu/callback", // Success URL
-      furl: "https://aerocog.tech/failure", // Failure URL
-      curl: "https://aerocog.tech/failure", // Cancel URL
+      furl: "https://aerocog.tech/api/payu/callback", // Failure URL
+      curl: "https://aerocog.tech/api/payu/callback", // Cancel URL
     };
 
     // Construct the string for hash generation
-    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+    const hashString = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|udf1|udf2|udf3|udf4|udf5|udf6|udf7|udf8|udf9|udf10|${salt}`;
     
     // Generate the hash using SHA-512
     const hash = crypto.createHash('sha512').update(hashString).digest('hex');

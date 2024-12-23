@@ -5,10 +5,7 @@ export async function POST(request) {
   try {
     const formData = await request.formData();
     const data = Object.fromEntries(formData.entries());
-
-    // Log the received data to debug the fields
-    console.log("Received Data:", data);
-
+    
     const {
       txnid,
       amount,
@@ -66,15 +63,7 @@ export async function POST(request) {
     // Log the calculated and received hash values
     console.log("Calculated Hash:", calculatedHash);
     console.log("Received Hash:", hash);
-    console.log("Expected vs Received Data:", {
-      txnid,
-      amount,
-      productinfo,
-      firstname,
-      email,
-      status,
-    });
-
+    
     // Validate the hash
     if (calculatedHash === hash) {
       if (status === "success") {
@@ -94,7 +83,7 @@ export async function POST(request) {
       console.error("Hash validation failed");
       // You can choose to redirect to an error page or handle it accordingly
       return NextResponse.redirect(
-        `https://aerocog.tech/error?txnid=${txnid}&status=hash_failed`,
+        `https://aerocog.tech/failure?txnid=${txnid}&status=hash_failed`,
       );
     }
   } catch (error) {
